@@ -111,9 +111,12 @@ def lambda_handler(event, _):
             Scanner = QuickScanPro(auth_object=auth)
         if upload_file_size < MAX_FILE_SIZE:
             # Get the file from S3
-            s3.download_file(bucket_name, key, f'/tmp/{key}')
+            scan_file = f'/tmp/{key}'
+            s3.download_file(bucket_name, key, scan_file)
+            with open(scan_file, "rb") as upload_file:
+                response = Scanner.upload_file(file=upload_file.read(), scan=True)
             # Upload the file to the CrowdStrike Falcon QuickScan Pro
-            response = Scanner.upload_file(file=f'/tmp/{key}', scan=True)
+            # response = Scanner.upload_file(file=f'/tmp/{key}', scan=True)
             if response["status_code"] > 201:
                 error_msg = (
                     f"Error uploading object {key} from "
