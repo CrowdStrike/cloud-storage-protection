@@ -29,9 +29,9 @@ The repository is organized by cloud provider, with each directory containing:
 
 ### Cloud Provider Examples
 
-- [AWS Examples](./aws/README.md)
-- [Azure Examples](./azure/README.md)
-- [GCP Examples](./gcp/README.md)
+- [AWS Examples](./AWS/README.md)
+- [Azure Examples](./Azure/README.md)
+- [GCP Examples](./GCP/README.md)
 
 ## Contributing
 
