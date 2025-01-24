@@ -1,6 +1,6 @@
 ![CrowdStrike Falcon](https://raw.githubusercontent.com/CrowdStrike/falconpy/main/docs/asset/cs-logo.png) [![Twitter URL](https://img.shields.io/twitter/url?label=Follow%20%40CrowdStrike&style=social&url=https%3A%2F%2Ftwitter.com%2FCrowdStrike)](https://twitter.com/CrowdStrike)<br/>
 
-# GCP Real-time Storage Container Protection Example
+# Azure Real-time Storage Container Protection Example
 
 This demonstration leverages Terraform to provide a functional demonstration of this integration.
 All of the necessary resources for using this solution to protect an Azure Storage Account Container are implemented for you as part of the environment configuration process, including sample files and command line helper scripts.
