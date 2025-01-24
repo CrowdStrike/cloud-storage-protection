@@ -10,7 +10,7 @@ read -s SECRET
 echo "Setting up..."
 TESTS="/home/cloudshell-user/cloud-storage-protection/AWS/demo/testfiles"
 mkdir $TESTS
-echo "export BUCKET=s3://quikscan-pro-demo-bucket" >> /etc/profile
+echo "export BUCKET=s3://quickscan-pro-demo-bucket" >> /etc/profile
 source /etc/profile
 cp /home/cloudshell-user/cloud-storage-protection/AWS/demo/bin/get-findings.sh /usr/local/bin/get-findings
 cp /home/cloudshell-user/cloud-storage-protection/AWS/demo/bin/upload.sh /usr/local/bin/upload

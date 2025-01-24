@@ -19,7 +19,7 @@ variable "region" {
 variable "unique_id" {
     description = "A unique identifier that is prepended to all created resource names"
     type = string
-    default = "quikscan-pro-demo"
+    default = "quickscan-pro-demo"
 }
 variable "lambda_function_filename" {
     description = "The name of the archive to use for the lambda function"

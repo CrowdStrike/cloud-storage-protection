@@ -79,7 +79,7 @@ You will be asked to provide:
 When prompted, type `yes` to apply the Terraform configuration.
 
 ## Use The Demo Environment
-At this point all components are in place to automatically scan files created in the S3 Bucket `quikscan-pro-demo-bucket`.  Use the following scripts to demonstrate Quikscan Pro with a few example files.
+At this point all components are in place to automatically scan files created in the S3 Bucket `quickscan-pro-demo-bucket`.  Use the following scripts to demonstrate QuickScan Pro with a few example files.
 
 ### Setup and Download Example Files
 
@@ -120,11 +120,11 @@ Latest findings:
         [INFO]  2025-01-23T21:01:44.842Z        306c17e6-efe6-4085-a845-88481a7448b5    File uploaded to QuickScan Pro.
         [INFO]  2025-01-23T21:01:48.952Z        306c17e6-efe6-4085-a845-88481a7448b5    No threat found in unscannable2.jpg
         [INFO]  2025-01-23T21:02:59.238Z        babc8395-7dea-4b43-a70a-53951e67acf7    File uploaded to QuickScan Pro.
-        [INFO]  2025-01-23T21:03:07.120Z        babc8395-7dea-4b43-a70a-53951e67acf7    Threat malicious1.bin removed from bucket quikscan-pro-demo-bucket
+        [INFO]  2025-01-23T21:03:07.120Z        babc8395-7dea-4b43-a70a-53951e67acf7    Threat malicious1.bin removed from bucket quickscan-pro-demo-bucket
 ```
 
 ### List Bucket
-List the bucket contents to confirm malicious files were removed by Quikscan Pro.
+List the bucket contents to confirm malicious files were removed by QuickScan Pro.
 
 ```shell
 aws s3 ls $BUCKET
