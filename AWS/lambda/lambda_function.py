@@ -125,7 +125,7 @@ def lambda_handler(event, _):
                 )
                 raise SystemExit(error_msg)
             else:
-                log.info("File uploaded to QuickScan Pro.")
+                log.info(f'File {key} uploaded to QuickScan Pro.')
 
             # Quick Scan
             try:
@@ -160,16 +160,15 @@ def lambda_handler(event, _):
                     verdict = result["verdict"].lower()
                     if verdict == "clean":
                         # File is clean
-                        scan_msg = f"No threat found in {key}"
-                        log.info(scan_msg)
+                        log.info(f"Verdict for {key}: {verdict}")
+                        log.info(f"No threat found in {key}")
                     elif verdict == "unknown":
                         # Undertermined scan failure
-                        scan_msg = f"Unable to scan {key}"
-                        log.info(scan_msg)
+                        log.info(f"Verdict for {key}: {verdict}")
+                        log.info(f"Unable to scan {key}")
                     elif verdict in ["malicious", "suspicious"]:
                         # Mitigation would trigger from here
-                        scan_msg = f"Verdict for {key}: {result['verdict']}"
-                        log.warning(scan_msg)
+                        log.warning(f"Verdict for {key}: {verdict}")
                         threat_removed = False
                         if MITIGATE:
                             # Remove the threat
