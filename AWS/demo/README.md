@@ -66,7 +66,7 @@ git clone https://github.com/CrowdStrike/cloud-storage-protection.git
 ### Stand Up Environment
 
 ```shell
-cd /cloud-storage-protection/AWS/demo
+cd /home/cloudshell-user/cloud-storage-protection/AWS/demo
 terraform init
 terraform apply
 ```
@@ -84,34 +84,33 @@ At this point all components are in place to automatically scan files created in
 ### Setup and Download Example Files
 
 ```shell
-cd /cloud-storage-protection/AWS/demo
+cd /home/cloudshell-user/cloud-storage-protection/AWS/demo
 chmod +x setup-demo.sh
 sudo ./setup-demo.sh
 ```
 
-Example files will be located in `/cloud-storage-protection/AWS/demo/testfiles` and includes multiple samples named according to the sample's type.
-+ 1 safe sample file
+Example files will be located in `/home/cloudshell-user/cloud-storage-protection/AWS/demo/testfiles` and includes multiple samples named according to the sample's type.
++ 2 safe sample files
 + 3 malware sample files
     - These samples are downloaded from CrowdStrike MalQuery as part of the demonstration instance bootstrap.
     - The [FalconPy](https://github.com/CrowdStrike/falconpy) code sample
     [MalQueryinator](https://github.com/CrowdStrike/falconpy/tree/main/samples/malquery#search-and-download-samples-from-malquery) is leveraged to accomplish this.
-+ 1 unscannable sample file
 
 ### Upload and Scan Example Files
-This demo utilizes a trigger on an S3 Bucket to automatically scan uploaded files with Lambda.
+This demo utilizes a trigger on an S3 Bucket to automatically scan uploaded files with Lambda.  Execute the following command to upload testfiles to S3:
 
 ```shell
-cd /cloud-storage-protection/AWS/demo
-./uploads.sh
+upload
 ```
 
 ### Get Findings
 To review findings, view the latest Log Stream for the Lambda Function's Log Group.  Execute the following commands:
 
 ```shell
-cd /cloud-storage-protection/AWS/demo
-./get-findings.sh
+get-findings
 ```
+
+> Please Note: It may take a few minutes for all scans to complete and scan results to show in findings.  You may run this command multiple times.
 
 ##### Example
 
@@ -144,7 +143,7 @@ aws s3 ls $BUCKET
 Simply use Terraform to destroy the Demo environment:
 
 ```shell
-cd /cloud-storage-protection/AWS/demo
+cd /home/cloudshell-user/cloud-storage-protection/AWS/demo
 terraform init
 terraform destroy
 ```

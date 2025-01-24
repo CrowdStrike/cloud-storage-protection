@@ -43,7 +43,7 @@ from botocore.exceptions import ClientError
 subprocess.call('pip install crowdstrike-falconpy -t /tmp/ --no-cache-dir'.split(), stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
 sys.path.insert(1, '/tmp/')
 # FalconPy SDK - Auth, Sample Uploads and Quick Scan
-from falconpy import OAuth2, QuickScanPro  # pylint: disable=E0401
+from falconpy import QuickScanPro  # pylint: disable=E0401
 
 # AWS Secret Vars
 SECRET_STORE_NAME = os.environ['SECRET_NAME']
@@ -60,9 +60,6 @@ s3 = boto3.client('s3')
 
 # Mitigate threats?
 MITIGATE = bool(json.loads(os.environ.get("MITIGATE_THREATS", "TRUE").lower()))
-
-# Base URL
-BASE_URL = os.environ.get("BASE_URL", "https://api.crowdstrike.com")
 
 def get_secret():
     """Function to get secret"""
@@ -104,11 +101,8 @@ def lambda_handler(event, _):
             secrets_dict = json.loads(secret_str)
             falcon_client_id = secrets_dict['FalconClientId']
             falcon_secret = secrets_dict['FalconSecret']
-            auth = OAuth2(
-                creds={"client_id": falcon_client_id, "client_secret": falcon_secret}, base_url=BASE_URL
-            )
             # Connect to the Quick Scan API
-            Scanner = QuickScanPro(auth_object=auth)
+            Scanner = QuickScanPro(client_id=falcon_client_id, client_secret=falcon_secret)
         if upload_file_size < MAX_FILE_SIZE:
             # Get the file from S3
             scan_file = f'/tmp/{key}'
@@ -161,14 +155,17 @@ def lambda_handler(event, _):
                     if verdict == "clean":
                         # File is clean
                         log.info(f"Verdict for {key}: {verdict}")
-                        log.info(f"No threat found in {key}")
+                        scan_msg = f"No threat found in {key}"
+                        log.info(scan_msg)
                     elif verdict == "unknown":
                         # Undertermined scan failure
                         log.info(f"Verdict for {key}: {verdict}")
-                        log.info(f"Unable to scan {key}")
+                        scan_msg = f"Unable to scan {key}"
+                        log.info(scan_msg)
                     elif verdict in ["malicious", "suspicious"]:
                         # Mitigation would trigger from here
-                        log.warning(f"Verdict for {key}: {verdict}")
+                        scan_msg = f"Verdict for {key}: {verdict}"
+                        log.info(scan_msg)
                         threat_removed = False
                         if MITIGATE:
                             # Remove the threat

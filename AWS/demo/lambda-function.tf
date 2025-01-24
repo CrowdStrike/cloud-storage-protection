@@ -40,9 +40,8 @@ resource "aws_lambda_function" "func" {
   depends_on = [data.archive_file.lambda_archive]
   environment {
     variables = {
-        "SECRET_NAME" = "${var.unique_id}-secret"
+        "SECRET_NAME" = "${var.unique_id}-secret-${random_string.random.result}"
         "SECRET_REGION" = var.region
-        "BASE_URL" = var.base_url
         "MITIGATE_THREATS" = var.lambda_mitigate_threats
     }
   }

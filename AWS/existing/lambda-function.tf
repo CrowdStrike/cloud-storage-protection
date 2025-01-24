@@ -42,7 +42,6 @@ resource "aws_lambda_function" "func" {
     variables = {
         "SECRET_NAME" = "${var.unique_id}-secret"
         "SECRET_REGION" = var.region
-        "BASE_URL" = var.base_url
         "MITIGATE_THREATS" = var.lambda_mitigate_threats
     }
   }

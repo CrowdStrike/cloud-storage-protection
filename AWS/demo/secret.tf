@@ -6,7 +6,7 @@ locals {
 }
 
 resource "aws_secretsmanager_secret" "secret" {
-  name = "${var.unique_id}-secret"
+  name = "${var.unique_id}-secret-${random_string.random.result}"
 }
 
 resource "aws_secretsmanager_secret_version" "secret_version" {
