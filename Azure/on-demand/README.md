@@ -66,7 +66,7 @@ git clone https://github.com/CrowdStrike/cloud-storage-protection.git
 In order to run this solution, you will need:
 
 - The URL of the Azure Storage Account container
-- access to CrowdStrike API keys with the following scopes:
+- Access to CrowdStrike API keys with the following scopes:
 
     | Service Collection | Scope               |
     | :----------------- | :------------------ |

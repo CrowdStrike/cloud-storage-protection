@@ -31,8 +31,8 @@ as part of the environment configuration process, including sample files and com
 
 + AWS account access with appropriate CLI keys and permissions already configured.
 + CrowdStrike Falcon API credentials with the following scopes:
-  + MalQuery - `READ`, `WRITE` (used to download malware samples)
-  + QuickScan Pro - `READ`, `WRITE`
+  + **MalQuery** - `READ`, `WRITE` (used to download malware samples)
+  + **QuickScan** Pro - `READ`, `WRITE`
   + You will be asked to provide these credentials when the `demo.sh` script executes.
 + `md5sum` (used to generate a unique bucket name)
 + Terraform installed in your environment or the ability to install Terraform.  If running this demo in CloudShell, please see the instructions to install Terraform.
