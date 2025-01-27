@@ -1,8 +1,9 @@
-![CrowdStrike](https://raw.github.com/CrowdStrike/Cloud-AWS/main/docs/img/cs-logo.png)
-
-[![Twitter URL](https://img.shields.io/twitter/url?label=Follow%20%40CrowdStrike&style=social&url=https%3A%2F%2Ftwitter.com%2FCrowdStrike)](https://twitter.com/CrowdStrike)
+<p align="center">
+   <img src="https://raw.githubusercontent.com/CrowdStrike/falconpy/main/docs/asset/cs-logo.png" alt="CrowdStrike logo" width="500"/>
+</p>
 
 # On-demand AWS S3 bucket scanner
+
 This example provides a stand-alone solution for scanning a S3 bucket before implementing protection.
 While similar to the serverless function, this solution will only scan the bucket's _existing_ file contents.
 
@@ -15,13 +16,15 @@ PENDING
 ```
 
 ## Running the program
+
 In order to run this solution, you will need a partial hostname for the target system and access to CrowdStrike API keys with the following scopes:
-| Service Collection | Scope |
-| :---- | :---- |
-| Quick Scan | __READ__, __WRITE__ |
-| Sample Uploads | __READ__, __WRITE__ |
+
+| Service Collection | Scope               |
+| :----------------- | :------------------ |
+| QuickScan Pro      | __READ__, __WRITE__ |
 
 ### Execution syntax
+
 The following command will execute the solution against the bucket you specify using default options.
 
 ```shell
