@@ -1,8 +1,9 @@
-![CrowdStrike](https://raw.github.com/CrowdStrike/Cloud-AWS/main/docs/img/cs-logo.png)
-
-[![Twitter URL](https://img.shields.io/twitter/url?label=Follow%20%40CrowdStrike&style=social&url=https%3A%2F%2Ftwitter.com%2FCrowdStrike)](https://twitter.com/CrowdStrike)
+<p align="center">
+   <img src="https://raw.githubusercontent.com/CrowdStrike/falconpy/main/docs/asset/cs-logo.png" alt="CrowdStrike logo" width="500"/>
+</p>
 
 # Existing bucket configuration
+
 This solution will leverage Terraform to apply CrowdStrike S3 Bucket Protection to an existing bucket.
 
 > Please note: If you use the `existing.sh` helper script provided in the root folder for this integration, you should not need to modify these files unless you want to change the region the solution is deployed to. The default region for this solution is `us-east-2` which should match the region where the bucket resides.
@@ -20,12 +21,12 @@ This solution will leverage Terraform to apply CrowdStrike S3 Bucket Protection 
 
 + AWS account access with appropriate CLI keys and permissions already configured.
 + CrowdStrike Falcon API credentials with the following scopes:
-    - Quick Scan - `READ`, `WRITE`
-    - Sample Uploads - `READ`,`WRITE`
-    - You will be asked to provide these credentials when the `existing.sh` script executes.
+  + **QuickScan Pro** - `READ`, `WRITE`
+  + You will be asked to provide these credentials when the `existing.sh` script executes.
 + Terraform installed on the machine you are testing from.
 
 ## Deploying protection
+
 From the root `s3-bucket-protection` folder execute the following command:
 
 ```shell
@@ -33,8 +34,9 @@ From the root `s3-bucket-protection` folder execute the following command:
 ```
 
 You will be asked to provide:
+
 + Your CrowdStrike API credentials.
-    - These values will not display when entered.
+  + These values will not display when entered.
 + The name of the S3 bucket to protect
 
 ```shell
@@ -60,6 +62,7 @@ Deployment takes approximately 30 seconds, after which you will be presented wit
 ```
 
 ## Removing the solution
+
 From the same folder where you deployed, execute the command:
 
 ```shell

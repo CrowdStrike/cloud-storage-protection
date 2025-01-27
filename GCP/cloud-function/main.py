@@ -36,7 +36,7 @@ import json
 import google.cloud.logging
 from google.cloud import storage
 
-# FalconPy SDK - Auth, Sample Uploads and Quick Scan
+# FalconPy SDK - Auth, QuickScan Pro
 from falconpy import OAuth2, QuickScanPro  # pylint: disable=E0401
 
 # Maximum file size for scan (256mb)
@@ -73,7 +73,7 @@ except KeyError as exc:
 auth = OAuth2(
     creds={"client_id": client_id, "client_secret": client_secret}, base_url=BASE_URL
 )
-# Connect to the Quick Scan API
+# Connect to the QuickScan Pro API
 Scanner = QuickScanPro(auth_object=auth)
 
 
@@ -100,7 +100,7 @@ def cs_bucket_protection(event, _):
         else:
             log.info("File uploaded to QuickScan Pro.")
 
-        # Quick Scan
+        # QuickScan Pro
         try:
             # Uploaded file unique identifier
             upload_sha = response["body"]["resources"][0]["sha256"]

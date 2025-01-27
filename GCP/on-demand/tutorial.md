@@ -33,8 +33,8 @@ In order to run this solution, you will need:
 
 + Name of the target GCP Cloud Storage bucket
 + The Project ID associated with the target bucket
-+ access to CrowdStrike API keys with the following scopes:
-  + QuickScan Pro - `READ`, `WRITE`
++ Access to CrowdStrike API keys with the following scopes:
+  + **QuickScan Pro** - `READ`, `WRITE`
 
 ### Execution syntax
 

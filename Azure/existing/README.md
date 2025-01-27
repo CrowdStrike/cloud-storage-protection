@@ -1,4 +1,6 @@
-![CrowdStrike Falcon](https://raw.githubusercontent.com/CrowdStrike/falconpy/main/docs/asset/cs-logo.png) [![Twitter URL](https://img.shields.io/twitter/url?label=Follow%20%40CrowdStrike&style=social&url=https%3A%2F%2Ftwitter.com%2FCrowdStrike)](https://twitter.com/CrowdStrike)<br/>
+<p align="center">
+   <img src="https://raw.githubusercontent.com/CrowdStrike/falconpy/main/docs/asset/cs-logo.png" alt="CrowdStrike logo" width="500"/>
+</p>
 
 # Azure Existing Storage Container Protection Example
 
@@ -27,9 +29,8 @@ All of the necessary resources for using this solution to protect an existing Az
 Create or modify an API Key in the Falcon Console and
 Assign the following scopes:
 
-+ Quick Scan - `READ`, `WRITE`
-+ Sample Uploads - `READ`,`WRITE`
-+ Malquery - `READ`, `WRITE`
++ **QuickScan Pro** - `READ`, `WRITE`
++ **Malquery** - `READ`, `WRITE`
 
 > You will be asked to provide these credentials when the `existing.sh` script executes.
 
