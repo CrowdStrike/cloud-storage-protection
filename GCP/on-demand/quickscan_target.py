@@ -1,8 +1,8 @@
 # pylint: disable=W1401
 # flake8: noqa
-"""Scan a GCP bucket with the CrowdStrike Quick Scan Pro API.
+"""Scan a GCP bucket with the CrowdStrike QuickScan Pro API.
 
-Scans a GCP Cloud Storage bucket using the CrowdStrike Falcon Quick Scan and Sample Uploads APIs.
+Scans a GCP Cloud Storage bucket using the CrowdStrike Falcon QuickScan Pro APIs.
 Implements multithreaded processing for improved performance and efficiency.
 
 ===== NOTES REGARDING THIS SOLUTION ============================================================
@@ -155,7 +155,7 @@ class QuickScanApp:
             level=self.config.log_level,
             format="%(asctime)s %(name)s %(levelname)s %(message)s",
         )
-        log = logging.getLogger("Quick Scan")
+        log = logging.getLogger("QuickScan Pro")
         rfh = RotatingFileHandler(
             "falcon_quick_scan.log", maxBytes=20971520, backupCount=5
         )

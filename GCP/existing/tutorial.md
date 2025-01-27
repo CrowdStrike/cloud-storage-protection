@@ -33,9 +33,8 @@ In order to properly use this demo, run the following helper script to enable th
 Create or modify an API Key in the Falcon Console and
 Assign the following scopes:
 
-- Quick Scan - `READ`, `WRITE`
-- Sample Uploads - `READ`,`WRITE`
-- Malquery - `READ`, `WRITE`
+- **QuickScan Pro** - `READ`, `WRITE`
+- **Malquery** - `READ`, `WRITE`
 
 > You will be asked to provide these credentials when the `existing.sh` script executes.
 
