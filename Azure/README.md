@@ -4,15 +4,14 @@
 
 # Azure Cloud Storage Bucket Protection
 
-This repository demonstrates different ways to leverage CrowdStrike's QuickScan Pro APIs to protect Azure Cloud Storage containers. Through these examples, you'll learn how to implement both real-time and on-demand malware scanning for your cloud storage.
+This solution demonstrates different ways to leverage CrowdStrike's QuickScan Pro APIs to protect Azure Cloud Storage containers. Through these examples, you'll learn how to implement both real-time and on-demand malware scanning for your cloud storage.
 
 ## Prerequisites
 
 + Have access to Azure w/ permissions to manage resources
 + Create or modify an API Key in the Falcon Console and
 Assign the following scopes:
-  + **Quick Scan** - `READ`, `WRITE`
-  + **Sample Uploads** - `READ`, `WRITE`
+  + **QuickScan Pro** - `READ`, `WRITE`
   + **Malquery** - `READ`, `WRITE`
     > Used to pull down sample malicious files for demonstration purposes
 

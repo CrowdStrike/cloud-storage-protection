@@ -68,10 +68,9 @@ In order to run this solution, you will need:
 - The URL of the Azure Storage Account container
 - access to CrowdStrike API keys with the following scopes:
 
-    | Service Collection | Scope |
-    | :---- | :---- |
-    | Quick Scan | __READ__, __WRITE__ |
-    | Sample Uploads | __READ__, __WRITE__ |
+    | Service Collection | Scope               |
+    | :----------------- | :------------------ |
+    | QuickScan Pro      | __READ__, __WRITE__ |
 
 - `Storage Blob Data Contributor` permissions on the existing container
 

@@ -9,7 +9,9 @@ from azure.identity import DefaultAzureCredential
 from azure.storage.blob import BlobServiceClient
 from falconpy import OAuth2, QuickScanPro
 
-logging.getLogger("azure.core.pipeline.policies.http_logging_policy").setLevel(logging.WARNING)
+logging.getLogger("azure.core.pipeline.policies.http_logging_policy").setLevel(
+    logging.WARNING
+)
 
 
 class Analysis:
@@ -86,8 +88,10 @@ class QuickScanApp:
             level=self.config.log_level,
             format="%(asctime)s %(name)s %(levelname)s %(message)s",
         )
-        log = logging.getLogger("Quick Scan")
-        rfh = RotatingFileHandler("falcon_quick_scan.log", maxBytes=20971520, backupCount=5)
+        log = logging.getLogger("QuickScan Pro")
+        rfh = RotatingFileHandler(
+            "falcon_quick_scan.log", maxBytes=20971520, backupCount=5
+        )
         f_format = logging.Formatter("%(asctime)s %(name)s %(levelname)s %(message)s")
         rfh.setLevel(self.config.log_level)
         rfh.setFormatter(f_format)
@@ -129,15 +133,21 @@ class QuickScanApp:
         """Retrieve keys from a container and then uploads them to the Sandbox API."""
         account_url = f"https://{self.config.storage_account}.blob.core.windows.net"
         default_credential = DefaultAzureCredential()
-        blob_service_client = BlobServiceClient(account_url, credential=default_credential)
+        blob_service_client = BlobServiceClient(
+            account_url, credential=default_credential
+        )
 
         try:
             self.az_container = az_container = blob_service_client.get_container_client(
                 container=self.config.container_name
             )
         except Exception as err:
-            self.logger.error("Unable to connect to container %s. %s", self.config.target_dir, err)
-            raise SystemExit(f"Unable to connect to container {self.config.container_name}. {err}")
+            self.logger.error(
+                "Unable to connect to container %s. %s", self.config.target_dir, err
+            )
+            raise SystemExit(
+                f"Unable to connect to container {self.config.container_name}. {err}"
+            )
 
         summaries = self.retrieve_all_items(az_container)
         total_files = len(summaries)
@@ -167,7 +177,8 @@ class QuickScanApp:
             # Process current batch using thread pool
             with ThreadPoolExecutor(max_workers=self.config.max_workers) as executor:
                 future_to_file = {
-                    executor.submit(self.process_single_file, item, max_file_size): item for item in current_batch
+                    executor.submit(self.process_single_file, item, max_file_size): item
+                    for item in current_batch
                 }
 
                 completed = 0
@@ -175,7 +186,9 @@ class QuickScanApp:
                     result = future.result()
                     completed += 1
                     if completed % 10 == 0:  # Log progress every 10 files
-                        self.logger.info("Batch progress: %d/%d files", completed, len(current_batch))
+                        self.logger.info(
+                            "Batch progress: %d/%d files", completed, len(current_batch)
+                        )
 
                     if result:
                         if result.get("results"):
@@ -199,7 +212,9 @@ class QuickScanApp:
 
         try:
             filename = os.path.basename(item.name)
-            file_data = io.BytesIO(self.az_container.get_blob_client(item).download_blob().readall())
+            file_data = io.BytesIO(
+                self.az_container.get_blob_client(item).download_blob().readall()
+            )
 
             # Upload file
             response = self.scanner.upload_file(file=file_data, scan=True)
@@ -256,9 +271,13 @@ class QuickScanApp:
                     )
                 else:
                     if verdict == "clean":
-                        self.logger.info("Verdict for %s: %s", result["full_path"], verdict)
+                        self.logger.info(
+                            "Verdict for %s: %s", result["full_path"], verdict
+                        )
                     else:
-                        self.logger.warning("Verdict for %s: %s", result["full_path"], verdict)
+                        self.logger.warning(
+                            "Verdict for %s: %s", result["full_path"], verdict
+                        )
 
     def scan_uploaded_samples(self, analyzer: Analysis, scan_id: str) -> dict:
         """Retrieve a scan using the ID of the scan provided by the scan submission."""
@@ -269,7 +288,9 @@ class QuickScanApp:
             scan_results = self.scanner.get_scan_result(ids=scan_id)
             try:
                 if scan_results["body"]["resources"][0]["scan"]["status"] == "done":
-                    results = scan_results["body"]["resources"][0]["result"]["file_artifacts"]
+                    results = scan_results["body"]["resources"][0]["result"][
+                        "file_artifacts"
+                    ]
                     analyzer.scanning = False
                 else:
                     time.sleep(self.config.scan_delay)
@@ -280,7 +301,7 @@ class QuickScanApp:
 
 def parse_command_line():
     """Parse any inbound command line arguments and set defaults."""
-    parser = argparse.ArgumentParser("Falcon Quick Scan Pro")
+    parser = argparse.ArgumentParser("Falcon QuickScan Pro Pro")
     parser.add_argument(
         "-l",
         "--log-level",
@@ -316,7 +337,9 @@ def parse_command_line():
         help="Target folder or container to scan. Value must start with 'https://' and have '.blob.core.windows.net' url suffix.",
         required=True,
     )
-    parser.add_argument("-k", "--key", dest="key", help="CrowdStrike Falcon API KEY", required=True)
+    parser.add_argument(
+        "-k", "--key", dest="key", help="CrowdStrike Falcon API KEY", required=True
+    )
     parser.add_argument(
         "-s",
         "--secret",
