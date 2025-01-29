@@ -1,4 +1,5 @@
 #!/bin/bash
+source /etc/profile
 echo "Uploading test files, please wait..."
 for i in $(ls /home/cloudshell-user/cloud-storage-protection/AWS/demo/testfiles)
 do

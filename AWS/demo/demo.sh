@@ -21,9 +21,8 @@ env_destroyed(){
     echo -e "$NC"
 }
 
-# Ensure script is executed from the cloud-storage-protection/demo directory
-[[ -d demo ]] && [[ -d lambda ]] || { echo -e "\nThis script should be executed from the cloud-storage-protection/demo directory.\n"; exit 1; }
 
+echo -e "\nThis script should be executed from the cloud-storage-protection/AWS/demo directory.\n"
 if [ -z "$1" ]
 then
    echo "You must specify 'up' or 'down' to run this script"
@@ -47,11 +46,13 @@ then
     echo "Setting up..."
     TESTS="/home/cloudshell-user/cloud-storage-protection/AWS/demo/testfiles"
     mkdir $TESTS
-    echo "export BUCKET=s3://${ALIAS}-bucket-${UNIQUE}" >> /etc/profile
-    source /etc/profile
-    cp /home/cloudshell-user/cloud-storage-protection/AWS/demo/bin/get-findings.sh /usr/local/bin/get-findings
-    cp /home/cloudshell-user/cloud-storage-protection/AWS/demo/bin/upload.sh /usr/local/bin/upload
-    chmod +x /usr/local/bin/*
+    #sudo echo "export BUCKET=s3://${ALIAS}-bucket-${UNIQUE}" >> /etc/profile
+    sudo sh -c "echo 'export ALIAS=${ALIAS}' >> /etc/profile"
+    sudo sh -c "echo 'export BUCKET=s3://${ALIAS}-bucket-${UNIQUE}' >> /etc/profile"
+    #source /etc/profile
+    sudo cp /home/cloudshell-user/cloud-storage-protection/AWS/demo/bin/get-findings.sh /usr/local/bin/get-findings
+    sudo cp /home/cloudshell-user/cloud-storage-protection/AWS/demo/bin/upload.sh /usr/local/bin/upload
+    sudo chmod +x /usr/local/bin/*
 
     # GET SAFE EXAMPLES
     echo "Getting safe example files..."
@@ -70,7 +71,7 @@ then
         ((C=C+1))
         mv $TESTS/$f $TESTS/malicious$C.bin
     done
-    chown -R ec2-user:ec2-user $TESTS
+    chown -R cloudshell-user:cloudshell-user $TESTS
     rm malicious.zip
     rm malqueryinator.py
     echo ""
@@ -82,8 +83,10 @@ then
 fi
 if [[ "$MODE" == "down" ]]
 then
-	terraform destroy -compact-warnings --auto-approve
-    rm lambda/quickscan-bucket.zip
+	terraform destroy -compact-warnings --auto-approve \
+	--var falcon_client_id="foo" --var falcon_client_secret="foo" \
+       	--var unique_id="foo"
+    rm -r testfiles/ -f
     env_destroyed
 	exit 0
 fi

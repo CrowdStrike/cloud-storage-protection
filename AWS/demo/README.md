@@ -69,8 +69,8 @@ git clone https://github.com/CrowdStrike/cloud-storage-protection.git
 
 ```shell
 cd /home/cloudshell-user/cloud-storage-protection/AWS/demo
-terraform init
-terraform apply
+chmod +x demo.sh
+sudo ./demo.sh up
 ```
 
 You will be asked to provide:
@@ -79,19 +79,24 @@ You will be asked to provide:
 + Your CrowdStrike API credentials.
   + These values will not display when entered.
 
-When prompted, type `yes` to apply the Terraform configuration.
+Once the script completes you will see the following message:
+
+```shell
+Setup complete. Use the upload command to upload and scan files.
+
+
+  __                        _
+ /\_\/                   o | |             |
+|    | _  _  _    _  _     | |          ,  |
+|    |/ |/ |/ |  / |/ |  | |/ \_|   |  / \_|
+ \__/   |  |  |_/  |  |_/|_/\_/  \_/|_/ \/ o
+ ```
 
 ## Use The Demo Environment
 
 At this point all components are in place to automatically scan files created in the S3 Bucket `quickscan-pro-demo-bucket`.  Use the following scripts to demonstrate QuickScan Pro with a few example files.
 
-### Setup and Download Example Files
-
-```shell
-cd /home/cloudshell-user/cloud-storage-protection/AWS/demo
-chmod +x setup-demo.sh
-sudo ./setup-demo.sh
-```
+### Example Files
 
 Example files will be located in `/home/cloudshell-user/cloud-storage-protection/AWS/demo/testfiles` and includes multiple samples named according to the sample's type.
 
@@ -149,12 +154,19 @@ aws s3 ls $BUCKET
 
 ## Tearing down the demonstration
 
-Simply use Terraform to destroy the Demo environment:
+Simply run the demo script again with the down argument to destroy the environment:
 
 ```shell
 cd /home/cloudshell-user/cloud-storage-protection/AWS/demo
-terraform init
-terraform destroy
+sudo ./demo.sh down
 ```
 
-When prompted, type `yes` to destroy the Terraform configuration.
+Once the script completes you will see the following message:
+
+```shell
+
+ ___                              __,
+(|  \  _  , _|_  ,_        o     /  |           __|_ |
+ |   ||/ / \_|  /  | |  |  |    |   |  /|/|/|  |/ |  |
+(\__/ |_/ \/ |_/   |/ \/|_/|/    \_/\_/ | | |_/|_/|_/o
+ ```
