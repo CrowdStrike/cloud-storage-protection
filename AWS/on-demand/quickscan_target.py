@@ -211,7 +211,7 @@ class QuickScanApp:
                 f"Unable to connect to bucket {self.config.target_dir}. {err}"
             ) from err
 
-        summaries = bucket.objects.all()
+        summaries = list(bucket.objects.all())
         total_files = len(summaries)
 
         self.logger.info(
@@ -267,18 +267,21 @@ class QuickScanApp:
         if item.size > max_file_size:
             self.logger.warning(
                 "Skipping %s: File size %d bytes exceeds maximum of %d bytes",
-                item.name,
+                item.key,
                 item.size,
                 max_file_size,
             )
             return None
 
         try:
-            filename = os.path.basename(item.name)
-            file_data = item.download_as_bytes()
+            filename = os.path.basename(item.key)
+            scan_file = f"/tmp/{item.key}"
+            s3 = boto3.client("s3")
+            s3.download_file(self.config.target_dir, item.key, scan_file)
+            with open(scan_file, "rb") as file_data:
 
             # Upload file
-            response = self.scanner.upload_file(file=file_data, scan=True)
+                response = self.scanner.upload_file(file=file_data, scan=True)
             sha = response["body"]["resources"][0]["sha256"]
             self.logger.info("Uploaded %s to %s", filename, sha)
 
@@ -302,14 +305,14 @@ class QuickScanApp:
 
             return {
                 "filename": filename,
-                "full_path": item.name,
+                "full_path": item.key,
                 "sha256": sha,
                 "scan_id": scan_id,
                 "results": results,
             }
 
         except Exception as e:  # pylint: disable=broad-except
-            self.logger.error("Error processing file %s: %s", item.name, str(e))
+            self.logger.error("Error processing file %s: %s", item.key, str(e))
             return None
 
     def report_single_result(self, result):
