@@ -23,7 +23,7 @@ variable "region" {
 variable "unique_id" {
     description = "A unique identifier that is prepended to all created resource names"
     type = string
-    default = "crowdstrike-s3-protection"
+    default = "quickscan-pro-demo"
 }
 variable "lambda_function_filename" {
     description = "The name of the archive to use for the lambda function"

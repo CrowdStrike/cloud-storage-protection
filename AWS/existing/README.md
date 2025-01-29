@@ -27,9 +27,10 @@ This solution will leverage Terraform to apply CrowdStrike S3 Bucket Protection 
 
 ## Deploying protection
 
-From the root `s3-bucket-protection` folder execute the following command:
+From the root `cloud-storage-protection/AWS` folder execute the following command:
 
 ```shell
+chmod +x existing.sh
 ./existing.sh add
 ```
 
@@ -38,16 +39,6 @@ You will be asked to provide:
 + Your CrowdStrike API credentials.
   + These values will not display when entered.
 + The name of the S3 bucket to protect
-
-```shell
-√ s3-bucket-protection % ./existing.sh add
-
-This script should be executed from the s3-bucket-protection root directory.
-
-CrowdStrike API Client ID:
-CrowdStrike API Client SECRET:
-Bucket name: BUCKET_NAME
-```
 
 If this is the first time you're executing the deployment, Terraform will initialize the working folder after you submit these values. After this process completes, Terraform will begin to deploy protection to the bucket.
 

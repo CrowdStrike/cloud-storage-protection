@@ -22,7 +22,7 @@ env_destroyed(){
 }
 
 
-echo -e "\nThis script should be executed from the cloud-storage-protection/existing directory.\n"
+echo -e "\nThis script should be executed from the cloud-storage-protection/AWS/existing directory.\n"
 if [ -z "$1" ]
 then
    echo "You must specify 'add' or 'remove' to run this script"
@@ -48,7 +48,6 @@ if [[ "$MODE" == "remove" ]]
 then
     read -p "Bucket name: " BUCKET_NAME
 	terraform destroy -compact-warnings --var bucket_name=$BUCKET_NAME --auto-approve
-    rm lambda/s3-bucket-protection.zip
     env_destroyed
 	exit 0
 fi
