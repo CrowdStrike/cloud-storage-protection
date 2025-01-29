@@ -22,7 +22,7 @@ env_destroyed(){
 }
 
 
-echo -e "\nThis script should be executed from the s3-bucket-protection root directory.\n"
+echo -e "\nThis script should be executed from the cloud-storage-protection/existing directory.\n"
 if [ -z "$1" ]
 then
    echo "You must specify 'add' or 'remove' to run this script"
@@ -36,13 +36,10 @@ then
 	read -sp "CrowdStrike API Client SECRET: " FSECRET
     echo
     read -p "Bucket name: " BUCKET_NAME
-    # This demo will be using a custom version of the falconpy layer for now. - jshcodes@CrowdStrike 05.04.2023 #230
-    #rm lambda/falconpy-layer.zip >/dev/null 2>&1
-    #curl -o lambda/falconpy-layer.zip https://falconpy.io/downloads/falconpy-layer.zip
-    if ! [ -f existing/.terraform.lock.hcl ]; then
-        terraform -chdir=existing init
+    if ! [ -f .terraform.lock.hcl ]; then
+        terraform init
     fi
-	terraform -chdir=existing apply -compact-warnings --var falcon_client_id=$FID \
+	terraform apply -compact-warnings --var falcon_client_id=$FID \
 		--var falcon_client_secret=$FSECRET --var bucket_name=$BUCKET_NAME --auto-approve
     all_done
 	exit 0
@@ -50,7 +47,7 @@ fi
 if [[ "$MODE" == "remove" ]]
 then
     read -p "Bucket name: " BUCKET_NAME
-	terraform -chdir=existing destroy -compact-warnings --var bucket_name=$BUCKET_NAME --auto-approve
+	terraform destroy -compact-warnings --var bucket_name=$BUCKET_NAME --auto-approve
     rm lambda/s3-bucket-protection.zip
     env_destroyed
 	exit 0
