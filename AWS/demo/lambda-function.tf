@@ -30,7 +30,7 @@ resource "aws_lambda_permission" "allow_bucket" {
 
 resource "aws_lambda_function" "func" {
   filename      = "${path.cwd}/lambda/${var.lambda_function_filename}"
-  function_name = "${var.unique_id}-function"
+  function_name = "${var.env_alias}-function"
   description   = var.lambda_description
   role          = aws_iam_role.iam_for_lambda.arn
   handler       = "lambda_function.lambda_handler"
@@ -40,7 +40,7 @@ resource "aws_lambda_function" "func" {
   depends_on = [data.archive_file.lambda_archive]
   environment {
     variables = {
-        "SECRET_NAME" = "${var.unique_id}-secret-${random_string.random.result}"
+        "SECRET_NAME" = "${var.env_alias}-secret-${random_string.random.result}"
         "SECRET_REGION" = var.region
         "MITIGATE_THREATS" = var.lambda_mitigate_threats
     }

@@ -11,7 +11,7 @@ data "aws_iam_policy_document" "lambda_execution_policy_document" {
     statement {
       actions = ["logs:CreateLogStream", "logs:PutLogEvents"]
       effect = "Allow"
-      resources = ["arn:aws:logs:${var.region}:${data.aws_caller_identity.current.account_id}:log-group:/aws/lambda/${var.unique_id}-function:*"]
+      resources = ["arn:aws:logs:${var.region}:${data.aws_caller_identity.current.account_id}:log-group:/aws/lambda/${var.env_alias}-function:*"]
     }
 }
 data "aws_iam_policy_document" "lambda_secret_policy_document" {
@@ -21,7 +21,7 @@ data "aws_iam_policy_document" "lambda_secret_policy_document" {
         ]
         effect = "Allow"
         resources = [
-            "arn:aws:secretsmanager:*:*:secret:${var.unique_id}-secret-*"
+            "arn:aws:secretsmanager:*:*:secret:${var.env_alias}-secret-*"
         ]
     }
 }
@@ -55,23 +55,23 @@ data "aws_iam_policy_document" "lambda_securityhub_policy_document" {
 }
 
 resource "aws_iam_policy" "lambda_secret_policy" {
-  name        = "${var.unique_id}_secret_policy"
+  name        = "${var.env_alias}_secret_policy"
   policy      = data.aws_iam_policy_document.lambda_secret_policy_document.json
 }
 resource "aws_iam_policy" "lambda_execution_policy" {
-  name        = "${var.unique_id}_execution_policy"
+  name        = "${var.env_alias}_execution_policy"
   policy      = data.aws_iam_policy_document.lambda_execution_policy_document.json
 }
 resource "aws_iam_policy" "lambda_s3_policy" {
-  name        = "${var.unique_id}_s3_policy"
+  name        = "${var.env_alias}_s3_policy"
   policy      = data.aws_iam_policy_document.lambda_s3_policy_document.json
 }
 resource "aws_iam_policy" "lambda_securityhub_policy" {
-  name        = "${var.unique_id}_securityhub_policy"
+  name        = "${var.env_alias}_securityhub_policy"
   policy      = data.aws_iam_policy_document.lambda_securityhub_policy_document.json
 }
 resource "aws_iam_role" "iam_for_lambda" {
-  name = "${var.unique_id}-execution-role" 
+  name = "${var.env_alias}-execution-role" 
   assume_role_policy = <<EOF
 {
   "Version": "2012-10-17",
@@ -88,22 +88,22 @@ resource "aws_iam_role" "iam_for_lambda" {
 EOF
 }
 resource "aws_iam_policy_attachment" "lambda_secret_policy_attach" {
-	name = "${var.unique_id}_secret-policy-attachment"
+	name = "${var.env_alias}_secret-policy-attachment"
 	roles = [aws_iam_role.iam_for_lambda.name]
 	policy_arn = aws_iam_policy.lambda_secret_policy.arn
 }
 resource "aws_iam_policy_attachment" "lambda_exec_policy_attach" {
-	name = "${var.unique_id}_lambda-exec-policy-attachment"
+	name = "${var.env_alias}_lambda-exec-policy-attachment"
 	roles = [aws_iam_role.iam_for_lambda.name]
 	policy_arn = aws_iam_policy.lambda_execution_policy.arn
 }
 resource "aws_iam_policy_attachment" "lambda_s3_policy_attach" {
-	name = "${var.unique_id}_lambda-s3-policy-attachment"
+	name = "${var.env_alias}_lambda-s3-policy-attachment"
 	roles = [aws_iam_role.iam_for_lambda.name]
 	policy_arn = aws_iam_policy.lambda_s3_policy.arn
 }
 resource "aws_iam_policy_attachment" "lambda_securityhub_policy_attach" {
-	name = "${var.unique_id}_lambda-securityhub-policy-attachment"
+	name = "${var.env_alias}_lambda-securityhub-policy-attachment"
 	roles = [aws_iam_role.iam_for_lambda.name]
 	policy_arn = aws_iam_policy.lambda_securityhub_policy.arn
 }

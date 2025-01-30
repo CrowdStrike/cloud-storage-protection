@@ -48,7 +48,7 @@ subprocess.call(
 )
 sys.path.insert(1, "/tmp/")
 # FalconPy SDK - QuickScan Pro
-from falconpy import OAuth2, QuickScanPro  # pylint: disable=E0401,wrong-import-position
+from falconpy import QuickScanPro  # pylint: disable=E0401,wrong-import-position
 
 # AWS Secret Vars
 SECRET_STORE_NAME = os.environ["SECRET_NAME"]
@@ -82,18 +82,6 @@ def get_secret():
     else:
         secret = base64.b64decode(get_secret_value_response["SecretBinary"])
     return secret
-
-
-def falcon_auth(client_id, client_secret):
-    """Authenticate to the CrowdStrike Falcon API"""
-    auth = OAuth2(
-        creds={"client_id": client_id, "client_secret": client_secret},
-        base_url=BASE_URL,
-    )
-    # Connect to the QuickScan API
-    Scanner = QuickScanPro(auth_object=auth)
-    return Scanner
-
 
 # Main routine
 def lambda_handler(event, _):
