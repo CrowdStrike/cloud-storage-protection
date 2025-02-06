@@ -173,7 +173,7 @@ def cs_bucket_protection(event, _):
                     scan_msg = f"Unrecognized response ({result['verdict']}) received from API for {file_name}."
                     log.info(scan_msg)
 
-            # Clean up the artifact in the sandbox
+            # Clean up the artifact in QuickScan Pro
             response = Scanner.delete_file(ids=upload_sha)
             if response["status_code"] > 201:
                 log.warning(

@@ -130,7 +130,7 @@ class QuickScanApp:
         return summaries
 
     def upload_bucket_samples(self):
-        """Retrieve keys from a container and then uploads them to the Sandbox API."""
+        """Retrieve keys from a container and then uploads them to the QuickScan Pro API."""
         account_url = f"https://{self.config.storage_account}.blob.core.windows.net"
         default_credential = DefaultAzureCredential()
         blob_service_client = BlobServiceClient(

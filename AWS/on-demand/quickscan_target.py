@@ -191,7 +191,7 @@ class QuickScanApp:
             raise
 
     def upload_bucket_samples(self):
-        """Retrieve keys from a bucket and then uploads them to the Sandbox API."""
+        """Retrieve keys from a bucket and then uploads them to the QuickScan Pro API."""
         if not self.config.region:
             self.logger.error(
                 "You must specify a region in order to scan a bucket target"

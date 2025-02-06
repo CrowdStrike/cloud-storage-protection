@@ -187,7 +187,7 @@ class QuickScanApp:
             raise
 
     def upload_bucket_samples(self):
-        """Retrieve keys from a bucket and then uploads them to the Sandbox API."""
+        """Retrieve keys from a bucket and then uploads them to the QuickScan Pro API."""
         if not self.config.project:
             self.logger.error(
                 "You must specify a project ID in order to scan a bucket target"
