@@ -301,7 +301,7 @@ class QuickScanApp:
 
 def parse_command_line():
     """Parse any inbound command line arguments and set defaults."""
-    parser = argparse.ArgumentParser("Falcon QuickScan Pro Pro")
+    parser = argparse.ArgumentParser("quickscan_target.py")
     parser.add_argument(
         "-l",
         "--log-level",
@@ -320,7 +320,7 @@ def parse_command_line():
         "-b",
         "--batch",
         dest="batch",
-        help="The number of files to include in a volume to scan.",
+        help="The number of files to include in a volume to scan (default: 1000).",
         required=False,
     )
     parser.add_argument(
@@ -334,7 +334,7 @@ def parse_command_line():
         "-t",
         "--target",
         dest="target",
-        help="Target folder or container to scan. Value must start with 'https://' and have '.blob.core.windows.net' url suffix.",
+        help="Value must start with 'https://' and have '.blob.core.windows.net' url suffix.",
         required=True,
     )
     parser.add_argument(
