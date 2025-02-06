@@ -94,7 +94,7 @@ A small command-line syntax help utility is available using the `-h` flag.
 
 ```shell
 python3 quickscan_target.py -h
-usage: Falcon Quick Scan [-h] [-l LOG_LEVEL] [-d CHECK_DELAY] [-b BATCH] -t TARGET -k KEY -s SECRET
+usage: quickscan_target.py [-h] [-l LOG_LEVEL] [-d CHECK_DELAY] [-b BATCH] [-w MAX_WORKERS] -t TARGET -k KEY -s SECRET
 
 options:
   -h, --help            show this help message and exit
@@ -103,11 +103,11 @@ options:
   -d CHECK_DELAY, --check-delay CHECK_DELAY
                         Delay between checks for scan results
   -b BATCH, --batch BATCH
-                        The number of files to include in a volume to scan.
+                        The number of files to include in a volume to scan (default: 1000).
   -w MAX_WORKERS, --workers MAX_WORKERS
                         Maximum number of worker threads to use for scanning (default: 10).
   -t TARGET, --target TARGET
-                        Target folder or container to scan. Value must start with 'https://' and have '.blob.core.windows.net' url suffix.
+                        Value must start with 'https://' and have '.blob.core.windows.net' url suffix.
   -k KEY, --key KEY     CrowdStrike Falcon API KEY
   -s SECRET, --secret SECRET
                         CrowdStrike Falcon API SECRET

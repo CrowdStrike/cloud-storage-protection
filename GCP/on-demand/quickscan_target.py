@@ -392,7 +392,7 @@ def parse_command_line():
         "-t",
         "--target",
         dest="target",
-        help="Target folder or bucket to scan. Bucket must have 'gs://' prefix.",
+        help="Cloud Storage bucket to scan. Bucket must have 'gs://' prefix.",
         required=True,
     )
     parser.add_argument(

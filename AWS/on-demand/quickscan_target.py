@@ -40,8 +40,8 @@ or as a serverless lambda.
 
 REQUIREMENTS:
 - Target must include "s3://" prefix for bucket scanning
-- Requires Google Cloud Storage library and CrowdStrike FalconPy >= v0.8.7
-    python3 -m pip install google-cloud-storage crowdstrike-falconpy
+- Requires AWS SDK and CrowdStrike FalconPy >= v0.8.7
+    python3 -m pip install boto3 crowdstrike-falconpy
 
 CONFIGURATION:
 - Batch size (-b, --batch):
@@ -398,7 +398,7 @@ def parse_command_line():
         "-t",
         "--target",
         dest="target",
-        help="Target folder or bucket to scan. Bucket must have 's3://' prefix.",
+        help="S3 bucket to scan. Bucket must have 's3://' prefix.",
         required=True
     )
     parser.add_argument(

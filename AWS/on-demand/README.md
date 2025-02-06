@@ -71,9 +71,9 @@ A small command-line syntax help utility is available using the `-h` flag.
 
 ```shell
 √ on-demand % piprun quickscan_target.py -h
-usage: Falcon Quick Scan [-h] [-l LOG_LEVEL] [-d CHECK_DELAY] [-b BATCH] -r REGION -t TARGET -k KEY -s SECRET
+usage: quickscan_target.py [-h] [-l LOG_LEVEL] [-d CHECK_DELAY] [-b BATCH] [-w MAX_WORKERS] -r REGION -t TARGET -k KEY -s SECRET
 
-optional arguments:
+options:
   -h, --help            show this help message and exit
   -l LOG_LEVEL, --log-level LOG_LEVEL
                         Default log level (DEBUG, WARN, INFO, ERROR)
@@ -86,7 +86,7 @@ optional arguments:
   -r REGION, --region REGION
                         Region the target bucket resides in
   -t TARGET, --target TARGET
-                        Target folder or bucket to scan. Bucket must have 's3://' prefix.
+                        S3 bucket to scan. Bucket must have 's3://' prefix.
   -k KEY, --key KEY     CrowdStrike Falcon API KEY
   -s SECRET, --secret SECRET
                         CrowdStrike Falcon API SECRET

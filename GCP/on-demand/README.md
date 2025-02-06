@@ -91,7 +91,7 @@ options:
   -p PROJECT_ID, --project PROJECT_ID
                         Project ID the target bucket resides in
   -t TARGET, --target TARGET
-                        Target folder or bucket to scan. Bucket must have 'gs://' prefix.
+                        Cloud Storage bucket to scan. Bucket must have 'gs://' prefix.
   -k KEY, --key KEY     CrowdStrike Falcon API KEY
   -s SECRET, --secret SECRET
                         CrowdStrike Falcon API SECRET
