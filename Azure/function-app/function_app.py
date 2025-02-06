@@ -60,7 +60,7 @@ def container_protection(client: blob.BlobClient):
     if upload_file_size < MAX_FILE_SIZE:
         # Get the blob file
         blob_data = io.BytesIO(client.download_blob().read())
-        # Upload the file to the CrowdStrike Falcon Sandbox
+        # Upload the file to QuickScan Pro
         response = Scanner.upload_file(
             file=blob_data,
             scan=True,
@@ -74,7 +74,7 @@ def container_protection(client: blob.BlobClient):
             )
             raise SystemExit(error_msg)
         else:
-            logging.info("File uploaded to CrowdStrike Falcon Sandbox.")
+            logging.info("File uploaded to QuickScan Pro.")
 
         # QuickScan Pro
         try:
@@ -148,12 +148,12 @@ def container_protection(client: blob.BlobClient):
                     scan_msg = f"Unrecognized response ({result['verdict']}) received from API for {file_name}."
                     logging.info(scan_msg)
 
-            # Clean up the artifact in the sandbox
+            # Clean up the artifact in QuickScan Pro
             response = Scanner.delete_file(ids=upload_sha)
             if response["status_code"] > 201:
-                logging.warning("Could not remove sample %s from sandbox.", file_name)
+                logging.warning("Could not remove sample %s from QuickScan Pro.", file_name)
             else:
-                logging.info("Sample %s removed from sandbox.", file_name)
+                logging.info("Sample %s removed from QuickScan Pro.", file_name)
         except Exception as err:
             logging.error(err)
             print(
