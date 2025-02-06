@@ -79,7 +79,7 @@ import logging
 from concurrent.futures import ThreadPoolExecutor, as_completed
 from logging.handlers import RotatingFileHandler
 from google.cloud import storage
-from falconpy import OAuth2, QuickScanPro
+from falconpy import APIHarnessV2, QuickScanPro
 
 
 class Analysis:
@@ -167,7 +167,7 @@ class QuickScanApp:
 
     def load_api_config(self):
         """Return an instance of the authentication class"""
-        return OAuth2(
+        return APIHarnessV2(
             client_id=self.config.falcon_client_id,
             client_secret=self.config.falcon_client_secret,
         )
@@ -275,7 +275,23 @@ class QuickScanApp:
             file_data = item.download_as_bytes()
 
             # Upload file
-            response = self.scanner.upload_file(file=file_data, scan=True)
+            # response = self.scanner.upload_file(file=file_data, scan=True)
+            # For now we have to use Uber class to allow sending the correct file name
+            response = self.auth.command(
+                "UploadFileMixin0Mixin94",
+                files=[("file", (filename, file_data))],
+                data={"scan": True},
+            )
+            if response["status_code"] >= 300:
+                if "errors" in response["body"]:
+                    self.logger.warning(
+                        "%s. Unable to upload file.",
+                        response["body"]["errors"][0]["message"],
+                    )
+                else:
+                    self.logger.warning("Rate limit exceeded.")
+                return None
+
             sha = response["body"]["resources"][0]["sha256"]
             self.logger.info("Uploaded %s to %s", filename, sha)
 
