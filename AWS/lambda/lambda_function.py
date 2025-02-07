@@ -48,7 +48,10 @@ subprocess.call(
 )
 sys.path.insert(1, "/tmp/")
 # FalconPy SDK - QuickScan Pro
-from falconpy import QuickScanPro  # pylint: disable=E0401,wrong-import-position
+from falconpy import (
+    APIHarnessV2,
+    QuickScanPro,
+)  # pylint: disable=E0401,wrong-import-position
 
 # AWS Secret Vars
 SECRET_STORE_NAME = os.environ["SECRET_NAME"]
@@ -83,6 +86,7 @@ def get_secret():
         secret = base64.b64decode(get_secret_value_response["SecretBinary"])
     return secret
 
+
 # Main routine
 def lambda_handler(event, _):
     """Function Handler"""
@@ -91,6 +95,7 @@ def lambda_handler(event, _):
         event["Records"][0]["s3"]["object"]["key"], encoding="utf-8"
     )
     upload_file_size = int(event["Records"][0]["s3"]["object"]["size"])
+    uber, scanner = None, None
     try:
         secret_str = get_secret()
         if secret_str:
@@ -98,17 +103,19 @@ def lambda_handler(event, _):
             falcon_client_id = secrets_dict["FalconClientId"]
             falcon_secret = secrets_dict["FalconSecret"]
             # Connect to the QuickScan Pro API
-            Scanner = QuickScanPro(
-                client_id=falcon_client_id, client_secret=falcon_secret
-            )
+            uber = APIHarnessV2(client_id=falcon_client_id, client_secret=falcon_secret)
+            scanner = QuickScanPro(auth_object=uber)
         if upload_file_size < MAX_FILE_SIZE:
             # Get the file from S3
             scan_file = f"/tmp/{key}"
             s3.download_file(bucket_name, key, scan_file)
             with open(scan_file, "rb") as upload_file:
-                response = Scanner.upload_file(file=upload_file.read(), scan=True)
-            # Upload the file to the CrowdStrike Falcon QuickScan Pro
-            # response = Scanner.upload_file(file=f'/tmp/{key}', scan=True)
+                # For now we have to use Uber class to allow sending the correct file name
+                response = uber.command(
+                    "UploadFileMixin0Mixin94",
+                    files=[("file", (key, upload_file.read()))],
+                    data={"scan": True},
+                )
             if response["status_code"] > 201:
                 error_msg = (
                     f"Error uploading object {key} from "
@@ -124,14 +131,14 @@ def lambda_handler(event, _):
                 # Uploaded file unique identifier
                 upload_sha = response["body"]["resources"][0]["sha256"]
                 # Scan request ID, generated when the request for the scan is made
-                scan_id = Scanner.launch_scan(sha256=upload_sha)["body"]["resources"][
+                scan_id = scanner.launch_scan(sha256=upload_sha)["body"]["resources"][
                     0
                 ]["id"]
                 scanning = True
                 # Loop until we get a result or the function times out
                 while scanning:
                     # Retrieve our scan using our scan ID
-                    scan_results = Scanner.get_scan_result(ids=scan_id)
+                    scan_results = scanner.get_scan_result(ids=scan_id)
                     result = None
                     try:
                         if (
@@ -198,7 +205,7 @@ def lambda_handler(event, _):
                         log.info(scan_msg)
 
                 # Clean up the artifact
-                response = Scanner.delete_file(ids=upload_sha)
+                response = scanner.delete_file(ids=upload_sha)
                 if response["status_code"] > 201:
                     log.warning("Could not remove sample (%s) from QuickScan Pro.", key)
 

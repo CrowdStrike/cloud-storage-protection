@@ -81,7 +81,7 @@ from concurrent.futures import ThreadPoolExecutor, as_completed
 from logging.handlers import RotatingFileHandler
 import boto3
 
-from falconpy import OAuth2, QuickScanPro
+from falconpy import APIHarnessV2, QuickScanPro
 
 
 class Analysis:
@@ -171,7 +171,7 @@ class QuickScanApp:
 
     def load_api_config(self):
         """Return an instance of the authentication class"""
-        return OAuth2(
+        return APIHarnessV2(
             client_id=self.config.falcon_client_id,
             client_secret=self.config.falcon_client_secret,
         )
@@ -279,9 +279,24 @@ class QuickScanApp:
             s3 = boto3.client("s3")
             s3.download_file(self.config.target_dir, item.key, scan_file)
             with open(scan_file, "rb") as file_data:
+                # Upload file
+                # For now we have to use Uber class to allow sending the correct file name
+                response = self.auth.command(
+                    "UploadFileMixin0Mixin94",
+                    files=[("file", (filename, file_data))],
+                    data={"scan": True},
+                )
 
-            # Upload file
-                response = self.scanner.upload_file(file=file_data, scan=True)
+            if response["status_code"] >= 300:
+                if "errors" in response["body"]:
+                    self.logger.warning(
+                        "%s. Unable to upload file.",
+                        response["body"]["errors"][0]["message"],
+                    )
+                else:
+                    self.logger.warning("Rate limit exceeded.")
+                return None
+
             sha = response["body"]["resources"][0]["sha256"]
             self.logger.info("Uploaded %s to %s", filename, sha)
 
@@ -392,28 +407,24 @@ def parse_command_line():
         "--region",
         dest="region",
         help="Region the target bucket resides in",
-        required=True
+        required=True,
     )
     parser.add_argument(
         "-t",
         "--target",
         dest="target",
         help="S3 bucket to scan. Bucket must have 's3://' prefix.",
-        required=True
+        required=True,
     )
     parser.add_argument(
-        "-k",
-        "--key",
-        dest="key",
-        help="CrowdStrike Falcon API KEY",
-        required=True
+        "-k", "--key", dest="key", help="CrowdStrike Falcon API KEY", required=True
     )
     parser.add_argument(
         "-s",
         "--secret",
         dest="secret",
         help="CrowdStrike Falcon API SECRET",
-        required=True
+        required=True,
     )
     return parser.parse_args()
 
