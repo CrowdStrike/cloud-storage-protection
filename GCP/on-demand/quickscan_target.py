@@ -275,7 +275,6 @@ class QuickScanApp:
             file_data = item.download_as_bytes()
 
             # Upload file
-            # response = self.scanner.upload_file(file=file_data, scan=True)
             # For now we have to use Uber class to allow sending the correct file name
             response = self.auth.command(
                 "UploadFileMixin0Mixin94",
