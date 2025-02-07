@@ -1,3 +1,5 @@
+# pylint: disable=W1401
+# flake8: noqa
 import os
 import io
 import time
@@ -7,7 +9,7 @@ from concurrent.futures import ThreadPoolExecutor, as_completed
 from logging.handlers import RotatingFileHandler
 from azure.identity import DefaultAzureCredential
 from azure.storage.blob import BlobServiceClient
-from falconpy import OAuth2, QuickScanPro
+from falconpy import APIHarnessV2, QuickScanPro
 
 logging.getLogger("azure.core.pipeline.policies.http_logging_policy").setLevel(
     logging.WARNING
@@ -72,6 +74,7 @@ class QuickScanApp:
         self.logger = None
         self.auth = None
         self.scanner = None
+        self.az_container = None
 
     def initialize(self):
         """Initialize the application components"""
@@ -100,7 +103,7 @@ class QuickScanApp:
 
     def load_api_config(self):
         """Return an instance of the authentication class"""
-        return OAuth2(
+        return APIHarnessV2(
             client_id=self.config.falcon_client_id,
             client_secret=self.config.falcon_client_secret,
         )
@@ -120,6 +123,7 @@ class QuickScanApp:
             raise
 
     def retrieve_all_items(self, az_container):
+        """Retrieve all items from an Azure container."""
         summaries = []
 
         page = az_container.list_blobs(name_starts_with=self.config.target_prefix)
@@ -143,11 +147,11 @@ class QuickScanApp:
             )
         except Exception as err:
             self.logger.error(
-                "Unable to connect to container %s. %s", self.config.target_dir, err
+                "Unable to connect to container %s. %s", self.config.target_prefix, err
             )
             raise SystemExit(
                 f"Unable to connect to container {self.config.container_name}. {err}"
-            )
+            ) from err
 
         summaries = self.retrieve_all_items(az_container)
         total_files = len(summaries)
@@ -201,6 +205,7 @@ class QuickScanApp:
         self.logger.info("Completed processing all %d files", total_files)
 
     def process_single_file(self, item, max_file_size):
+        """Process a single file: upload, scan, and get results."""
         if item.size > max_file_size:
             self.logger.warning(
                 "Skipping %s: File size %d bytes exceeds maximum of %d bytes",
@@ -217,14 +222,22 @@ class QuickScanApp:
             )
 
             # Upload file
-            response = self.scanner.upload_file(file=file_data, scan=True)
-            if "errors" in response["body"]:
-                if len(response["body"]["errors"]) > 0:
+            # For now we have to use Uber class to allow sending the correct file name
+            response = self.auth.command(
+                "UploadFileMixin0Mixin94",
+                files=[("file", (filename, file_data))],
+                data={"scan": True},
+            )
+            if response["status_code"] >= 300:
+                if "errors" in response["body"]:
                     self.logger.warning(
-                        "There was an error while uploading %s to be scanned: %s",
-                        filename,
+                        "%s. Unable to upload file.",
                         response["body"]["errors"][0]["message"],
                     )
+                else:
+                    self.logger.warning("Rate limit exceeded.")
+                return None
+
             sha = response["body"]["resources"][0]["sha256"]
             self.logger.info("Uploaded %s to %s", filename, sha)
 

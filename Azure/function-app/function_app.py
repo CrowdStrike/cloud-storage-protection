@@ -1,3 +1,5 @@
+# pylint: disable=W1401
+# flake8: noqa
 """CrowdStrike Azure Storage Account Container Protection with QuickScan.
 
 Based on the work of @jshcodes w/ s3-bucket-protection & @carlos.matos w/ cloud-storage-protection
@@ -12,7 +14,7 @@ import json
 import logging
 import azure.functions as func
 import azurefunctions.extensions.bindings.blob as blob
-from falconpy import OAuth2, QuickScanPro
+from falconpy import APIHarnessV2, QuickScanPro
 
 app = func.FunctionApp()
 
@@ -38,12 +40,10 @@ except KeyError as exc:
     raise SystemExit("FALCON_CLIENT_SECRET environment variable not set") from exc
 
 # Authenticate to the CrowdStrike Falcon API
-auth = OAuth2(
-    creds={"client_id": client_id, "client_secret": client_secret}, base_url=BASE_URL
-)
+uber = APIHarnessV2(client_id=client_id, client_secret=client_secret, base_url=BASE_URL)
 
 # Connect to the QuickScan Pro API
-Scanner = QuickScanPro(auth_object=auth)
+Scanner = QuickScanPro(auth_object=uber)
 
 
 @app.blob_trigger(
@@ -61,9 +61,11 @@ def container_protection(client: blob.BlobClient):
         # Get the blob file
         blob_data = io.BytesIO(client.download_blob().read())
         # Upload the file to QuickScan Pro
-        response = Scanner.upload_file(
-            file=blob_data,
-            scan=True,
+        # For now we have to use Uber class to allow sending the correct file name
+        response = uber.command(
+            "UploadFileMixin0Mixin94",
+            files=[("file", (file_name, blob_data))],
+            data={"scan": True},
         )
         if response["status_code"] > 201:
             logging.warning(str(response))
@@ -151,7 +153,9 @@ def container_protection(client: blob.BlobClient):
             # Clean up the artifact in QuickScan Pro
             response = Scanner.delete_file(ids=upload_sha)
             if response["status_code"] > 201:
-                logging.warning("Could not remove sample %s from QuickScan Pro.", file_name)
+                logging.warning(
+                    "Could not remove sample %s from QuickScan Pro.", file_name
+                )
             else:
                 logging.info("Sample %s removed from QuickScan Pro.", file_name)
         except Exception as err:
