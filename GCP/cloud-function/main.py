@@ -37,7 +37,7 @@ import google.cloud.logging
 from google.cloud import storage
 
 # FalconPy SDK - Auth, QuickScan Pro
-from falconpy import OAuth2, QuickScanPro  # pylint: disable=E0401
+from falconpy import QuickScanPro, APIHarnessV2  # pylint: disable=E0401
 
 # Maximum file size for scan (256mb)
 MAX_FILE_SIZE = 256 * 1024 * 1024
@@ -70,11 +70,10 @@ except KeyError as exc:
     raise SystemExit("FALCON_CLIENT_SECRET environment variable not set") from exc
 
 # Authenticate to the CrowdStrike Falcon API
-auth = OAuth2(
-    creds={"client_id": client_id, "client_secret": client_secret}, base_url=BASE_URL
-)
+uber = APIHarnessV2(client_id=client_id, client_secret=client_secret, base_url=BASE_URL)
+
 # Connect to the QuickScan Pro API
-Scanner = QuickScanPro(auth_object=auth)
+Scanner = QuickScanPro(auth_object=uber)
 
 
 # Main routine
@@ -89,7 +88,12 @@ def cs_bucket_protection(event, _):
         blob = bucket.blob(file_name)
         blob_data = blob.download_as_bytes()
         # Upload the file to the CrowdStrike Falcon QuickScan Pro
-        response = Scanner.upload_file(file=blob_data, scan=True)
+        # For now we have to use Uber class to allow sending the correct file name
+        response = uber.command(
+            "UploadFileMixin0Mixin94",
+            files=[("file", (file_name, blob_data))],
+            data={"scan": True},
+        )
         if response["status_code"] > 201:
             error_msg = (
                 f"Error uploading object {file_name} from "
