@@ -274,18 +274,17 @@ class QuickScanApp:
             return None
 
         try:
+            bucket_name=self.config.target_dir
             filename = os.path.basename(item.key)
-            scan_file = f"/tmp/{item.key}"
             s3 = boto3.client("s3")
-            s3.download_file(self.config.target_dir, item.key, scan_file)
-            with open(scan_file, "rb") as file_data:
-                # Upload file
-                # For now we have to use Uber class to allow sending the correct file name
-                response = self.auth.command(
-                    "UploadFileMixin0Mixin94",
-                    files=[("file", (filename, file_data))],
-                    data={"scan": True},
-                )
+            blob_data = s3.get_object(Bucket=bucket_name, Key=item.key)['Body'].read()
+            # Upload file
+            # For now we have to use Uber class to allow sending the correct file name
+            response = self.auth.command(
+                "UploadFileMixin0Mixin94",
+                files=[("file", (filename, blob_data))],
+                data={"scan": True},
+            )
 
             if response["status_code"] >= 300:
                 if "errors" in response["body"]:
@@ -317,6 +316,11 @@ class QuickScanApp:
 
             # Get results
             results = self.scan_uploaded_samples(Analysis(), scan_id)
+            self.logger.info(f'filename: {filename}')
+            self.logger.info(f'item.key: {item.key}')
+            self.logger.info(f'sha: {sha}')
+            self.logger.info(f'scan_id: {scan_id}')
+            self.logger.info(f'results: {results}')
 
             return {
                 "filename": filename,
