@@ -37,6 +37,7 @@ resource "aws_lambda_function" "func" {
   layers        = [data.aws_lambda_layer_version.pythontools.arn]
   runtime       = "python3.12"
   timeout       = 30
+  memory_size   = 512
   depends_on = [data.archive_file.lambda_archive]
   environment {
     variables = {
