@@ -107,11 +107,11 @@ def lambda_handler(event, _):
             scanner = QuickScanPro(auth_object=uber)
         if upload_file_size < MAX_FILE_SIZE:
             # Get the file from S3
-            blob_data = s3.get_object(Bucket=bucket_name, Key=key)['Body'].read()
+            blob_data = s3.get_object(Bucket=bucket_name, Key=key)["Body"].read()
             # For now we have to use Uber class to allow sending the correct file name
             response = uber.command(
                 "UploadFileMixin0Mixin94",
-                files=[("file", (filename, blob_data))],
+                files=[("file", (key, blob_data))],
                 data={"scan": True},
             )
 
