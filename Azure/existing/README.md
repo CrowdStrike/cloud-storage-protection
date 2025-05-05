@@ -101,10 +101,11 @@ Next, you'll use the helper commands to upload the sample files, and check for f
 Now that your environment is stood up, and your cloud shell is configured, you can start testing functionality.
 
 ### Export helper commands path
+
 The demo environment uses a few helper commands to help with certain actions. For the helper commands to work properly, you will need to export the directory path to your PATH variable by running the  commands below.
 
 ```sh
-export PATH=~/Cloud-Azure/storage-account-container-protection/bin:$PATH
+export PATH=~/cloud-storage-protection/Azure/bin:$PATH
 ```
 
 ### List sample files
@@ -170,7 +171,6 @@ get-findings
 
 > [!TIP]
 > Due to cold starts, it could take up to 10 minutes for Azure Functions to detect the files. You can try opening the Azure function to nudge an invocation, or running the upload command again
-
 
 #### Example
 
