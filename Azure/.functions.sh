@@ -157,7 +157,7 @@ configure_environment() {
     echo -e "Use the command \`upload\` to upload all of the test files to your demo storage container.\n"
     echo -e "You can view the contents of your storage container with the command \`list-bucket\`.\n"
     echo -e "Use the command \`get-findings\` to view all findings for your demo storage container.\n"
-    echo -e "For the commands to work, you will need to update your path \`export PATH=~/azure-cloud-storage-protection/quickscan-pro/bin:\$PATH\`.\n"
+    echo -e "For the commands to work, you will need to update your path \`export PATH=~/cloud-storage-protection/Azure/bin:\$PATH\`.\n"
     echo -e "You may also need to login by using \`az login \` command to execute the \`get-findings\` command. \n"
 
 }
