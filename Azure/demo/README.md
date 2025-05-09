@@ -48,7 +48,7 @@ Login to your Azure subscription
 Clone this repository by running the following commands
 
 ```shell
-git clone https://github.com/CrowdStrike/Cloud-Azure.git
+git clone https://github.com/CrowdStrike/cloud-storage-protection.git
 ```
 
 Navigate to the cloud-storage-protection/Azure directory
