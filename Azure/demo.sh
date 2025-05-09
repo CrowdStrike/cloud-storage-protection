@@ -23,45 +23,20 @@ if [ $# -ne 1 ]; then
     die "Usage: $0 [up|down]"
 fi
 
-# Function to generate a unique resource group name
-generate_resource_group_name() {
-    local prefix="cs-storage-protection-demo"
-    local random_suffix
-    random_suffix=$(LC_ALL=C tr -dc 'a-z0-9' </dev/urandom | head -c 8)
-    echo "${prefix}-${random_suffix}"
-}
-
-# Save state information
+# Save terraform outputs to state file
 save_state() {
-    echo "RESOURCE_GROUP_NAME=${1}" > "${STATE_FILE}"
+    # Store terraform output values for later use in teardown
+    terraform -chdir=demo output -json > "${STATE_FILE}"
     echo "Created on: $(date)" >> "${STATE_FILE}"
-}
-
-# Load state information
-load_resource_group_name() {
-    if [[ -f "${STATE_FILE}" ]]; then
-        source "${STATE_FILE}"
-        echo "${RESOURCE_GROUP_NAME}"
-    else
-        die "State file not found. Please run 'up' command first."
-    fi
 }
 
 # Function to handle the 'up' mode
 handle_up() {
-    local fid fsecret resource_group_name
+    local fid fsecret
     project_id=$(azure_get_subscription_id)
     echo "--------------------------------------------------"
     echo "Using Azure Subscription ID: ${project_id}"
     echo "--------------------------------------------------"
-
-    # Generate a unique resource group name
-    resource_group_name=$(generate_resource_group_name)
-    echo "Using resource group name: ${resource_group_name}"
-    echo "--------------------------------------------------"
-
-    # Save the resource group name for later use
-    save_state "${resource_group_name}"
 
     read -rsp "CrowdStrike API Client ID: " fid
     echo
@@ -92,8 +67,10 @@ handle_up() {
         --var "falcon_client_id=${fid}" \
         --var "falcon_client_secret=${fsecret}" \
         --var "base_url=$(cs_cloud)" \
-        --var "resource_group_name=${resource_group_name}" \
         --auto-approve
+
+    # Save the terraform state for teardown
+    save_state
 
     echo -e "${GRN}\nPausing for 30 seconds to allow configuration to settle.${NC}"
 
@@ -105,15 +82,15 @@ handle_up() {
 handle_down() {
     local success=1
 
-    # Load the resource group name from state file
-    local resource_group_name
-    resource_group_name=$(load_resource_group_name)
+    # Check if state file exists
+    if [[ ! -f "${STATE_FILE}" ]]; then
+        die "State file not found. Please run 'up' command first."
+    fi
 
-    echo "Destroying resources in group: ${resource_group_name}"
+    echo "Destroying resources..."
 
     while ((success != 0)); do
         if terraform -chdir=demo destroy -compact-warnings \
-            --var "resource_group_name=${resource_group_name}" \
             --auto-approve; then
             success=0
         else

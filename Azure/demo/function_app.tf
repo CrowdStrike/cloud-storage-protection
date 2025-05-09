@@ -5,7 +5,7 @@ data "archive_file" "file_function_app" {
 }
 
 resource "azurerm_linux_function_app" "function_app" {
-  name                       = "${var.project}-function-app"
+  name                       = "${var.project}-func-${random_string.resource_suffix.result}"
   resource_group_name        = azurerm_resource_group.resource_group.name
   location                   = var.location
   service_plan_id            = azurerm_service_plan.app_service_plan.id
@@ -14,26 +14,22 @@ resource "azurerm_linux_function_app" "function_app" {
     "AzureWebJobsStorage"                       = azurerm_storage_account.storage_account.primary_connection_string,
     "FUNCTIONS_WORKER_RUNTIME"                  = "python",
     "WEBSITE_CONTENTAZUREFILECONNECTIONSTRING"  = azurerm_storage_account.storage_account.primary_connection_string,
-    "WEBSITE_CONTENTSHARE"                      = "${var.project}-content-share",
+    "WEBSITE_CONTENTSHARE"                      = "${var.project}-content-${random_string.resource_suffix.result}",
     "azurequickscan_STORAGE"                    = azurerm_storage_account.quick_scan_storage_account.primary_connection_string,
     "FALCON_CLIENT_ID"                          = var.falcon_client_id,
     "FALCON_CLIENT_SECRET"                      = var.falcon_client_secret,
     "MITIGATE_THREATS"                          = var.function_mitigate_threats,
     "BASE_URL"                                  = var.base_url,
     "quick_scan_container_name"                 = azurerm_storage_container.quick_scan_storage_container.name
-
-
   }
   site_config {
     application_stack {
       python_version  = "3.11"
     }
-
   }
   storage_account_name        = azurerm_storage_account.storage_account.name
   storage_account_access_key  = azurerm_storage_account.storage_account.primary_access_key
   functions_extension_version = "~4"
-
 }
 
 locals {

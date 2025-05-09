@@ -1,5 +1,5 @@
 resource "azurerm_storage_account" "quick_scan_storage_account" {
-  name = "${var.project}demostorage"
+  name = "${var.project}demo-${random_string.resource_suffix.result}"
   resource_group_name = azurerm_resource_group.resource_group.name
   location = var.location
   account_tier = "Standard"
