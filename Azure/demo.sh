@@ -63,11 +63,13 @@ handle_up() {
         terraform -chdir=demo init
     fi
 
-    terraform -chdir=demo apply -compact-warnings \
+    if ! terraform -chdir=demo apply -compact-warnings \
         --var "falcon_client_id=${fid}" \
         --var "falcon_client_secret=${fsecret}" \
         --var "base_url=$(cs_cloud)" \
-        --auto-approve
+        --auto-approve; then
+            die "Terraform apply failed. Please check the error messages above."
+    fi
 
     # Save the terraform state for teardown
     save_state
@@ -100,7 +102,7 @@ handle_down() {
     done
 
     # Cleanup
-    sudo rm -f /usr/local/bin/{get-findings,upload,list-bucket}
+    rm -f ~/.local/bin/{get-findings,upload,list-bucket}
     rm -rf "${TESTS}" /tmp/malicious
     rm -f "${STATE_FILE}"
     env_destroyed

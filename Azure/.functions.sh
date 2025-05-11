@@ -109,6 +109,11 @@ configure_environment() {
     STORAGE_ACCOUNT_KEY=$(terraform -chdir="${CHDIR}" output -raw storage_account_key)
     APP_INSIGHTS_APP_ID=$(terraform -chdir="${CHDIR}" output -raw app_insights_app_id)
 
+    # Ensure our variables are not empty
+    if [[ -z "$STORAGE_ACCOUNT" || -z "$STORAGE_CONTAINER" || -z "$STORAGE_ACCOUNT_KEY" || -z "$APP_INSIGHTS_APP_ID" ]]; then
+        die "Error: Required Terraform outputs are missing."
+    fi
+
     echo -e "\nConfiguring environment for demo...\n"
     [[ -d $TESTS ]] || mkdir "$TESTS"
     # SAFE EXAMPLES
@@ -130,20 +135,35 @@ configure_environment() {
     #chown -R ec2-user:ec2-user $TESTS
     rm malicious.zip
     rm malqueryinator.py
+
     # Helper scripts
+    # Create ~/.local/bin if it doesn't exist
+    mkdir -p ~/.local/bin
+
+    # Check if .local/bin is already in PATH under any representation
+    if [[ ":$PATH:" != *":$HOME/.local/bin:"* ]] && [[ ":$PATH:" != *":~/.local/bin:"* ]]; then
+        echo "export PATH=\"$HOME/.local/bin:\$PATH\"" >> ~/.bashrc
+        export PATH="$HOME/.local/bin:$PATH"
+        echo "Added ~/.local/bin to PATH"
+    fi
+
     echo -e "Copying helper functions...\n"
-    mv ./bin/get-findings.sh ./bin/get-findings
+
+    # Process and copy helper scripts
     sed -i "s/APP_INSIGHTS_APP_ID/${APP_INSIGHTS_APP_ID}/g" ./bin/get-findings
-    mv ./bin/upload.sh ./bin/upload
     sed -i "s/STORAGE_CONTAINER/${STORAGE_CONTAINER//\//\\/}/g" ./bin/upload
     sed -i "s/STORAGE_ACCOUNT_KEY/${STORAGE_ACCOUNT_KEY//\//\\/}/g" ./bin/upload
     sed -i "s/STORAGE_ACCOUNT/${STORAGE_ACCOUNT//\//\\/}/g" ./bin/upload
     sed -i "s/TESTS_DIR/${TESTS//\//\\/}/g" ./bin/upload
-    mv ./bin/list-bucket.sh ./bin/list-bucket
     sed -i "s/STORAGE_ACCOUNT_KEY/${STORAGE_ACCOUNT_KEY//\//\\/}/g" ./bin/list-bucket
     sed -i "s/STORAGE_ACCOUNT/${STORAGE_ACCOUNT//\//\\/}/g" ./bin/list-bucket
     sed -i "s/STORAGE_CONTAINER/${STORAGE_CONTAINER//\//\\/}/g" ./bin/list-bucket
-    chmod +x ./bin/get-findings ./bin/upload ./bin/list-bucket
+
+    # Copy files to user's bin directory
+    cp ./bin/{get-findings,upload,list-bucket} ~/.local/bin/
+    chmod +x ~/.local/bin/{get-findings,upload,list-bucket}
+
+    echo "Helper commands installed in ~/.local/bin"
     # install appication-insights extension
     az extension add --name application-insights
 
