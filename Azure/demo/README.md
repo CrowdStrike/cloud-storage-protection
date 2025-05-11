@@ -102,14 +102,6 @@ Next, you'll use the helper commands to upload the sample files, and check for f
 
 Now that your environment is stood up, and your cloud shell is configured, you can start testing functionality.
 
-### Export helper commands path
-
-The demo environment uses a few helper commands to help with certain actions. For the helper commands to work properly, you will need to export the directory path to your PATH variable by running the  commands below.
-
-```sh
-export PATH=~/cloud-storage-protection/Azure/bin:$PATH
-```
-
 ### List sample files
 
 Run the following command to list the sample files:
@@ -191,9 +183,10 @@ The quickest method for viewing the logs on the console is to:
 
 Navigate to the [Function App](https://portal.azure.com/#view/HubsExtension/BrowseResource/resourceType/Microsoft.Web%2Fsites/kind/functionapp) service page
 -> Select the demo function
--> On the sidebar select `Application Insights`
--> Click "View Application Insights data"
--> On the sidebar click Logs
+-> On the sidebar select `Monitoring -> Application Insights`
+-> Select `View Application Insights data`
+-> On the sidebar under `Monitoringing` select `Logs`
+-> Change the dropdown from `Simple mode` to `KQL mode`
 -> In the text box, type in `traces | where message has "Threat" or message has "Mitigate" | project message`
 
 ---

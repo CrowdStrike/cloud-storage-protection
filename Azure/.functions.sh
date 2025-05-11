@@ -118,8 +118,8 @@ configure_environment() {
     [[ -d $TESTS ]] || mkdir "$TESTS"
     # SAFE EXAMPLES
     echo -e "Copying safe sample files...\n"
-    cp assets/April-Adversary-Stardust.jpg "$TESTS"/unscannable1.png
-    cp assets/BITWISE-SPIDER_AU_500px.png "$TESTS"/unscannable2.png
+    wget -q -O $TESTS/unscannable1.png https://www.crowdstrike.com/wp-content/uploads/2023/02/GEN-PANDA_AU_500px-1-300x300.png
+    wget -q -O $TESTS/unscannable2.jpg https://www.crowdstrike.com/blog/wp-content/uploads/2018/04/April-Adversary-Stardust.jpg
     cp /usr/bin/whoami "$TESTS"/safe1.bin
     cp /usr/sbin/fdisk "$TESTS"/safe2.bin
     # # MALICIOUS EXAMPLES
