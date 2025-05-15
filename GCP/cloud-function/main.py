@@ -92,7 +92,7 @@ def cs_bucket_protection(event, _):
         response = uber.command(
             "UploadFileMixin0Mixin94",
             files=[("file", (file_name, blob_data))],
-            data={"scan": True},
+            data={"scan": False},
         )
         if response["status_code"] > 201:
             error_msg = (
