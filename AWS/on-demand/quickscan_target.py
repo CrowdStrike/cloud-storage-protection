@@ -283,7 +283,7 @@ class QuickScanApp:
             response = self.auth.command(
                 "UploadFileMixin0Mixin94",
                 files=[("file", (filename, blob_data))],
-                data={"scan": True},
+                data={"scan": False},
             )
 
             if response["status_code"] >= 300:

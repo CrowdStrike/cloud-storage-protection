@@ -112,7 +112,7 @@ def lambda_handler(event, _):
             response = uber.command(
                 "UploadFileMixin0Mixin94",
                 files=[("file", (key, blob_data))],
-                data={"scan": True},
+                data={"scan": False},
             )
 
             if response["status_code"] > 201:
