@@ -3,6 +3,11 @@ variable "project" {
   description = "Project name"
 }
 
+variable "resource_group_name" {
+  description = "Name of the resource group to create"
+  type        = string
+  default     = "cs-storage-protection-demo"
+}
 
 variable "location" {
   type = string

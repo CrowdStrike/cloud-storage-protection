@@ -65,7 +65,7 @@ def container_protection(client: blob.BlobClient):
         response = uber.command(
             "UploadFileMixin0Mixin94",
             files=[("file", (file_name, blob_data))],
-            data={"scan": True},
+            data={"scan": False},
         )
         if response["status_code"] > 201:
             logging.warning(str(response))

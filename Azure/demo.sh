@@ -7,6 +7,7 @@ readonly RD="\033[1;31m"
 readonly GRN="\033[1;33m"
 readonly NC="\033[0;0m"
 readonly LB="\033[1;34m"
+readonly STATE_FILE="./demo/.cs_demo_state"
 
 # Source the common functions
 # shellcheck disable=SC1091
@@ -22,6 +23,13 @@ if [ $# -ne 1 ]; then
     die "Usage: $0 [up|down]"
 fi
 
+# Save terraform outputs to state file
+save_state() {
+    # Store terraform output values for later use in teardown
+    terraform -chdir=demo output -json > "${STATE_FILE}"
+    echo "Created on: $(date)" >> "${STATE_FILE}"
+}
+
 # Function to handle the 'up' mode
 handle_up() {
     local fid fsecret
@@ -33,6 +41,7 @@ handle_up() {
     read -rsp "CrowdStrike API Client ID: " fid
     echo
     read -rsp "CrowdStrike API Client SECRET: " fsecret
+    echo
 
     # Validate inputs
     if [[ -z "${fid}" ]] || [[ -z "${fsecret}" ]]; then
@@ -54,22 +63,34 @@ handle_up() {
         terraform -chdir=demo init
     fi
 
-    terraform -chdir=demo apply -compact-warnings \
+    if ! terraform -chdir=demo apply -compact-warnings \
         --var "falcon_client_id=${fid}" \
         --var "falcon_client_secret=${fsecret}" \
         --var "base_url=$(cs_cloud)" \
-        --auto-approve
+        --auto-approve; then
+            die "Terraform apply failed. Please check the error messages above."
+    fi
+
+    # Save the terraform state for teardown
+    save_state
 
     echo -e "${GRN}\nPausing for 30 seconds to allow configuration to settle.${NC}"
 
     sleep 30
     configure_environment demo
-
 }
 
 # Function to handle the 'down' mode
 handle_down() {
     local success=1
+
+    # Check if state file exists
+    if [[ ! -f "${STATE_FILE}" ]]; then
+        die "State file not found. Please run 'up' command first."
+    fi
+
+    echo "Destroying resources..."
+
     while ((success != 0)); do
         if terraform -chdir=demo destroy -compact-warnings \
             --auto-approve; then
@@ -81,8 +102,9 @@ handle_down() {
     done
 
     # Cleanup
-    sudo rm -f /usr/local/bin/{get-findings,upload,list-bucket}
+    rm -f ~/.local/bin/{get-findings,upload,list-bucket}
     rm -rf "${TESTS}" /tmp/malicious
+    rm -f "${STATE_FILE}"
     env_destroyed
 }
 
