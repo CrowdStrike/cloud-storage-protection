@@ -70,7 +70,12 @@ except KeyError as exc:
     raise SystemExit("FALCON_CLIENT_SECRET environment variable not set") from exc
 
 # Authenticate to the CrowdStrike Falcon API
-uber = APIHarnessV2(client_id=client_id, client_secret=client_secret, base_url=BASE_URL)
+uber = APIHarnessV2(
+    client_id=client_id,
+    client_secret=client_secret,
+    base_url=BASE_URL,
+    user_agent="cloud-storage-protection/gcp/cloud-function",
+)
 
 # Connect to the QuickScan Pro API
 Scanner = QuickScanPro(auth_object=uber)

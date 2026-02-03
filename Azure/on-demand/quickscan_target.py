@@ -106,6 +106,7 @@ class QuickScanApp:
         return APIHarnessV2(
             client_id=self.config.falcon_client_id,
             client_secret=self.config.falcon_client_secret,
+            user_agent="cloud-storage-protection/azure/on-demand",
         )
 
     def run(self):
