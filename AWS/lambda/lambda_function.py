@@ -103,7 +103,11 @@ def lambda_handler(event, _):
             falcon_client_id = secrets_dict["FalconClientId"]
             falcon_secret = secrets_dict["FalconSecret"]
             # Connect to the QuickScan Pro API
-            uber = APIHarnessV2(client_id=falcon_client_id, client_secret=falcon_secret)
+            uber = APIHarnessV2(
+                client_id=falcon_client_id,
+                client_secret=falcon_secret,
+                user_agent="cloud-storage-protection/aws/lambda",
+            )
             scanner = QuickScanPro(auth_object=uber)
         if upload_file_size < MAX_FILE_SIZE:
             # Get the file from S3
