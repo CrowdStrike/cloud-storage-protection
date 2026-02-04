@@ -16,18 +16,34 @@ IMPLEMENTATION DETAILS:
 - Rotating log file implementation
 
 PROCESSING WORKFLOW:
+- Phase 1 - Parallel Upload with Auto-Scan:
+    * Files are uploaded with scan=True to auto-launch scans
+    * Multi-threaded upload using configurable worker threads
+    * Scan IDs are collected from upload responses
+
+- Phase 2 - Batch Poll for Results:
+    * Single API call to get results for all pending scans
+    * Polls until all scans complete
+
+- Phase 3 - Batch Cleanup:
+    * Single API call to delete all uploaded files
+
 - Batch Processing:
     * Total files are divided into batches (default: 1000 files per batch)
-    * Each batch is processed sequentially
+    * Each batch is processed sequentially through the 3 phases
     * Example: 1500 files with batch=500 creates 3 batches of 500 files each
 
 - Worker Threads:
-    * Within each batch, files are processed concurrently
+    * Within each batch, files are uploaded concurrently
     * Number of concurrent operations controlled by max_workers (default: 10)
     * Example: With max_workers=10, up to 10 files from the current batch
-      are processed simultaneously
+      are uploaded simultaneously
 
 PERFORMANCE CONSIDERATIONS:
+- Optimized API usage:
+    * Upload with scan=True eliminates separate launch_scan() calls
+    * Batch result polling reduces API round-trips
+    * Batch cleanup reduces delete calls from N to 1
 - Performance is influenced by:
     * Network bandwidth and latency
     * API rate limits
@@ -80,16 +96,6 @@ from concurrent.futures import ThreadPoolExecutor, as_completed
 from logging.handlers import RotatingFileHandler
 from google.cloud import storage
 from falconpy import APIHarnessV2, QuickScanPro
-
-
-class Analysis:
-    """Class to hold our analysis and status."""
-
-    def __init__(self):
-        self.uploaded = []
-        self.files = []
-        self.scan_ids = []
-        self.scanning = True
 
 
 class Configuration:  # pylint: disable=R0902
@@ -221,23 +227,26 @@ class QuickScanApp:
 
         max_file_size = 256 * 1024 * 1024  # 256MB in bytes
 
-        # Process files in batches
+        # Process files in batches using optimized 3-phase workflow
         for i in range(0, total_files, self.config.batch):
             batch_end = min(i + self.config.batch, total_files)
             current_batch = summaries[i:batch_end]
+            batch_num = (i // self.config.batch) + 1
 
             self.logger.info(
                 "Processing batch %d: files %d to %d (%d files)",
-                (i // self.config.batch) + 1,
+                batch_num,
                 i + 1,
                 batch_end,
                 len(current_batch),
             )
 
-            # Process current batch using thread pool
+            # Phase 1: Parallel upload with auto-scan (scan=True)
+            uploaded = []
+            self.logger.info("Phase 1: Uploading files with auto-scan enabled...")
             with ThreadPoolExecutor(max_workers=self.config.max_workers) as executor:
                 future_to_file = {
-                    executor.submit(self.process_single_file, item, max_file_size): item
+                    executor.submit(self.upload_file, item, max_file_size): item
                     for item in current_batch
                 }
 
@@ -245,23 +254,51 @@ class QuickScanApp:
                 for future in as_completed(future_to_file):
                     result = future.result()
                     completed += 1
-                    if completed % 10 == 0:  # Log progress every 10 files
+                    if completed % 10 == 0:
                         self.logger.info(
-                            "Batch progress: %d/%d files", completed, len(current_batch)
+                            "Upload progress: %d/%d files", completed, len(current_batch)
                         )
-
                     if result:
-                        if result.get("results"):
-                            self.report_single_result(result)
-                        # Clean up the artifact
-                        self.scanner.delete_file(ids=result["sha256"])
+                        uploaded.append(result)
 
-            self.logger.info("Completed batch %d", (i // self.config.batch) + 1)
+            if not uploaded:
+                self.logger.warning("No files were successfully uploaded in batch %d", batch_num)
+                continue
+
+            self.logger.info(
+                "Phase 1 complete: %d/%d files uploaded successfully",
+                len(uploaded),
+                len(current_batch),
+            )
+
+            # Phase 2: Batch poll for results
+            self.logger.info("Phase 2: Polling for scan results...")
+            scan_ids = [item["scan_id"] for item in uploaded]
+            results = self.poll_batch_results(scan_ids)
+            self.logger.info("Phase 2 complete: All scan results received")
+
+            # Phase 3: Report results and batch cleanup
+            self.logger.info("Phase 3: Reporting results and cleaning up...")
+            for item in uploaded:
+                scan_result = results.get(item["scan_id"])
+                if scan_result:
+                    self.report_single_result({
+                        "filename": item["filename"],
+                        "full_path": item["full_path"],
+                        "sha256": item["sha256"],
+                        "results": scan_result,
+                    })
+
+            # Batch cleanup - delete all files in one API call
+            sha256_list = [item["sha256"] for item in uploaded]
+            self.cleanup_batch(sha256_list)
+
+            self.logger.info("Completed batch %d", batch_num)
 
         self.logger.info("Completed processing all %d files", total_files)
 
-    def process_single_file(self, item, max_file_size):
-        """Process a single file: upload, scan, and get results."""
+    def upload_file(self, item, max_file_size):
+        """Upload a single file with auto-scan enabled. Returns immediately after upload."""
         if item.size > max_file_size:
             self.logger.warning(
                 "Skipping %s: File size %d bytes exceeds maximum of %d bytes",
@@ -275,13 +312,13 @@ class QuickScanApp:
             filename = os.path.basename(item.name)
             file_data = item.download_as_bytes()
 
-            # Upload file
-            # For now we have to use Uber class to allow sending the correct file name
+            # Upload file with scan=True to auto-launch scan
             response = self.auth.command(
                 "UploadFileMixin0Mixin94",
                 files=[("file", (filename, file_data))],
-                data={"scan": False},
+                data={"scan": True},
             )
+
             if response["status_code"] >= 300:
                 if "errors" in response["body"]:
                     self.logger.warning(
@@ -292,78 +329,80 @@ class QuickScanApp:
                     self.logger.warning("Rate limit exceeded.")
                 return None
 
-            sha = response["body"]["resources"][0]["sha256"]
-            self.logger.info("Uploaded %s to %s", filename, sha)
-
-            # Launch scan
-            scanned = self.scanner.launch_scan(sha256=sha)
-            if scanned["status_code"] >= 300:
-                if "errors" in scanned["body"]:
-                    self.logger.warning(
-                        "%s. Unable to launch scan for file.",
-                        scanned["body"]["errors"][0]["message"],
-                    )
-                else:
-                    self.logger.warning("Rate limit exceeded.")
-                return None
-
-            scan_id = scanned["body"]["resources"][0]["id"]
-            self.logger.info("Scan %s submitted for analysis", scan_id)
-
-            # Get results
-            results = self.scan_uploaded_samples(Analysis(), scan_id)
+            resource = response["body"]["resources"][0]
+            sha = resource["sha256"]
+            scan_id = resource["scan_id"]
+            self.logger.info("Uploaded %s (sha256: %s, scan_id: %s)", filename, sha, scan_id)
 
             return {
                 "filename": filename,
                 "full_path": item.name,
                 "sha256": sha,
                 "scan_id": scan_id,
-                "results": results,
             }
 
         except Exception as e:  # pylint: disable=broad-except
-            self.logger.error("Error processing file %s: %s", item.name, str(e))
+            self.logger.error("Error uploading file %s: %s", item.name, str(e))
             return None
+
+    def poll_batch_results(self, scan_ids: list) -> dict:
+        """Poll for results of multiple scans using batch API calls."""
+        results = {}
+        pending = set(scan_ids)
+
+        while pending:
+            # Single API call for all pending scans
+            response = self.scanner.get_scan_result(ids=list(pending))
+
+            if response["status_code"] >= 300:
+                self.logger.warning("Error polling scan results: %s", response)
+                time.sleep(self.config.scan_delay)
+                continue
+
+            for resource in response["body"].get("resources", []):
+                scan_id = resource["id"]
+                if resource.get("scan", {}).get("status") == "done":
+                    results[scan_id] = resource.get("result", {}).get("file_artifacts", [])
+                    pending.discard(scan_id)
+
+            if pending:
+                self.logger.debug("Waiting for %d scans to complete...", len(pending))
+                time.sleep(self.config.scan_delay)
+
+        return results
+
+    def cleanup_batch(self, sha256_list: list):
+        """Delete multiple files in a single API call."""
+        if not sha256_list:
+            return
+
+        self.logger.info("Cleaning up %d files...", len(sha256_list))
+        response = self.scanner.delete_file(ids=sha256_list)
+
+        if response["status_code"] >= 300:
+            self.logger.warning("Error during batch cleanup: %s", response)
+        else:
+            self.logger.info("Batch cleanup complete")
 
     def report_single_result(self, result):
         """Report results for a single file."""
         for artifact in result["results"]:
             if artifact["sha256"] == result["sha256"]:
-                verdict = artifact["verdict"].lower()
+                verdict = artifact["verdict"].lower().replace(" ", "_")
                 if verdict == "unknown":
                     self.logger.info(
                         "Unscannable/Unknown file %s: verdict %s",
                         result["full_path"],
                         verdict,
                     )
-                else:
-                    if verdict == "clean":
-                        self.logger.info(
-                            "Verdict for %s: %s", result["full_path"], verdict
-                        )
-                    else:
-                        self.logger.warning(
-                            "Verdict for %s: %s", result["full_path"], verdict
-                        )
-
-    def scan_uploaded_samples(self, analyzer: Analysis, scan_id: str) -> dict:
-        """Retrieve a scan using the ID of the scan provided by the scan submission."""
-        results = {}
-        analyzer.scanning = True
-        self.logger.info("Waiting for scan results...")
-        while analyzer.scanning:
-            scan_results = self.scanner.get_scan_result(ids=scan_id)
-            try:
-                if scan_results["body"]["resources"][0]["scan"]["status"] == "done":
-                    results = scan_results["body"]["resources"][0]["result"][
-                        "file_artifacts"
-                    ]
-                    analyzer.scanning = False
-                else:
-                    time.sleep(self.config.scan_delay)
-            except IndexError:
-                pass
-        return results
+                elif verdict in ("clean", "likely_benign"):
+                    self.logger.info(
+                        "Verdict for %s: %s", result["full_path"], verdict
+                    )
+                else:  # suspicious, malicious
+                    self.logger.warning(
+                        "Verdict for %s: %s", result["full_path"], verdict
+                    )
 
 
 def parse_command_line():

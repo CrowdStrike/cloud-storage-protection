@@ -170,9 +170,12 @@ cython_debug/
 # PyPI configuration file
 .pypirc
 
+# Terraform
 .terraform/
 .terraform.lock.hcl
 .terraform.tfstate.lock.info
-function_app.zip
 terraform.tfstate
 terraform.tfstate.backup
+
+# Azure Function App
+function_app.zip
