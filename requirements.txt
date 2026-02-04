@@ -1,0 +1,23 @@
+# Cloud Storage Protection - Development Dependencies
+#
+# Install all dependencies for local development:
+#   uv pip install -r requirements.txt
+#
+# Or with pip:
+#   pip install -r requirements.txt
+
+# CrowdStrike SDK (required for all providers)
+crowdstrike-falconpy
+
+# AWS
+boto3
+
+# Azure
+azure-functions
+azure-storage-blob
+azure-identity
+azurefunctions.extensions.bindings.blob
+
+# GCP
+google-cloud-storage
+google-cloud-logging

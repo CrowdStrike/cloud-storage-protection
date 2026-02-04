@@ -162,11 +162,16 @@ def lambda_handler(event, _):
                         pass
 
                 if result["sha256"] == upload_sha:
-                    verdict = result["verdict"].lower()
+                    verdict = result["verdict"].lower().replace(" ", "_")
                     if verdict == "clean":
                         # File is clean
                         log.info(f"Verdict for {key}: {verdict}")
                         scan_msg = f"No threat found in {key}"
+                        log.info(scan_msg)
+                    elif verdict == "likely_benign":
+                        # File is likely benign
+                        log.info(f"Verdict for {key}: {verdict}")
+                        scan_msg = f"File {key} is likely benign"
                         log.info(scan_msg)
                     elif verdict == "unknown":
                         # Undertermined scan failure

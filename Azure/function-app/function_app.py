@@ -112,10 +112,14 @@ def container_protection(client: blob.BlobClient):
                     # Results aren't populated yet, skip
                     pass
             if result["sha256"] == upload_sha:
-                verdict = result["verdict"].lower()
+                verdict = result["verdict"].lower().replace(" ", "_")
                 if verdict == "clean":
                     # File is clean
                     scan_msg = f"No threat found in {file_name}"
+                    logging.info(scan_msg)
+                elif verdict == "likely_benign":
+                    # File is likely benign
+                    scan_msg = f"File {file_name} is likely benign"
                     logging.info(scan_msg)
                 elif verdict == "unknown":
                     # Undertermined scan failure

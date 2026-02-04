@@ -139,10 +139,14 @@ def cs_bucket_protection(event, _):
                     pass
 
             if result["sha256"] == upload_sha:
-                verdict = result["verdict"].lower()
+                verdict = result["verdict"].lower().replace(" ", "_")
                 if verdict == "clean":
                     # File is clean
                     scan_msg = f"No threat found in {file_name}"
+                    log.info(scan_msg)
+                elif verdict == "likely_benign":
+                    # File is likely benign
+                    scan_msg = f"File {file_name} is likely benign"
                     log.info(scan_msg)
                 elif verdict == "unknown":
                     # Undertermined scan failure
