@@ -369,7 +369,7 @@ class QuickScanApp:
                     pending.discard(scan_id)
 
             if pending:
-                self.logger.debug("Waiting for %d scans to complete...", len(pending))
+                self.logger.info("Waiting for %d scans to complete...", len(pending))
                 time.sleep(self.config.scan_delay)
 
         return results
