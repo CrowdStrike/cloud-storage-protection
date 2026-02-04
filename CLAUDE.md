@@ -32,10 +32,8 @@ uv venv
 # Activate it
 source .venv/bin/activate
 
-# Install all dependencies from cloud provider directories
-uv pip install -r GCP/cloud-function/requirements.txt \
-               -r Azure/function-app/requirements.txt \
-               -r Azure/on-demand/requirements.txt
+# Install all dependencies
+uv pip install -r requirements.txt
 ```
 
 Always activate the venv before working with Python files in this repo.
